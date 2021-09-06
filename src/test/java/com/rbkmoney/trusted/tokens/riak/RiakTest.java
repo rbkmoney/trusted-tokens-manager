@@ -1,12 +1,14 @@
-package com.rbkmoney.trusted.tokens.repository;
+package com.rbkmoney.trusted.tokens.riak;
 
 import com.rbkmoney.trusted.tokens.ConditionTemplate;
 import com.rbkmoney.trusted.tokens.config.RiakAbstractTestIntegration;
 import com.rbkmoney.trusted.tokens.converter.CardTokenToRowConverter;
 import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.createTemplateWithWithdrawalAndPayment;
@@ -15,7 +17,13 @@ import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TokenRepositoryTest extends RiakAbstractTestIntegration {
+public class RiakTest extends RiakAbstractTestIntegration {
+
+    @Value("${riak.bucket.token}")
+    public String tokenBucketName;
+
+    @Value("${riak.bucket.template}")
+    public String templateBucketName;
 
     @Autowired
     private TrustedTokenRepository trustedTokenRepository;
@@ -27,8 +35,8 @@ public class TokenRepositoryTest extends RiakAbstractTestIntegration {
     private TemplateToRowConverter templateToRowConverter;
 
     @Test
-    public void riakTestCardTokenData() throws InterruptedException {
-        sleep(50000);
+    public void riakTest() throws InterruptedException {
+        sleep(10000);
         CardTokenData emptyCardTokenData = trustedTokenRepository.get(TOKEN, CardTokenData.class, tokenBucketName);
 
         assertNull(emptyCardTokenData);
@@ -40,11 +48,7 @@ public class TokenRepositoryTest extends RiakAbstractTestIntegration {
 
         assertNotNull(cardTokenData.getPayments());
         assertNotNull(cardTokenData.getWithdrawals());
-    }
 
-    @Test
-    public void riakTestConditionTemplate() throws InterruptedException {
-        sleep(50000);
         ConditionTemplate emptyConditionTemplate =
                 trustedTokenRepository.get(TOKEN, ConditionTemplate.class, templateBucketName);
 

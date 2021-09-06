@@ -1,7 +1,6 @@
 package com.rbkmoney.trusted.tokens.config;
 
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -23,13 +22,8 @@ import java.time.Duration;
         initializers = RiakAbstractTestIntegration.Initializer.class)
 public abstract class RiakAbstractTestIntegration {
 
-    @Value("${riak.bucket.token}")
-    public String tokenBucketName;
-
-    @Value("${riak.bucket.template}")
-    public String templateBucketName;
-
     private static final String IMAGE_NAME = "basho/riak-kv";
+
     @Container
     public static GenericContainer riak = new GenericContainer(IMAGE_NAME)
             .withExposedPorts(8098, 8087)
