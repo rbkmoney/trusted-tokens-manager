@@ -36,7 +36,7 @@ public class RiakTest extends RiakAbstractTestIntegration {
 
     @Test
     public void riakTest() throws InterruptedException {
-        sleep(10000);
+        sleep(50000);
         CardTokenData emptyCardTokenData = trustedTokenRepository.get(TOKEN, CardTokenData.class, tokenBucketName);
 
         assertNull(emptyCardTokenData);
