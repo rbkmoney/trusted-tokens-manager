@@ -1,6 +1,7 @@
 package com.rbkmoney.trusted.tokens.config;
 
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
@@ -21,6 +22,11 @@ import java.time.Duration;
 @ContextConfiguration(classes = TrustedTokensApplication.class,
         initializers = RiakAbstractTestIntegration.Initializer.class)
 public abstract class RiakAbstractTestIntegration {
+
+    @BeforeAll
+    public static void beforeAll() {
+        riak.start();
+    }
 
     private static final String IMAGE_NAME = "basho/riak-kv";
 

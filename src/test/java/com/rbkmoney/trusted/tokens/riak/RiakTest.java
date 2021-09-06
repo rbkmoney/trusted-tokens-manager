@@ -37,11 +37,6 @@ public class RiakTest extends RiakAbstractTestIntegration {
     @Autowired
     private TemplateToRowConverter templateToRowConverter;
 
-    @BeforeAll
-    public static void beforeAll() {
-        riak.start();
-    }
-
     @Test
     public void riakTest() throws InterruptedException {
         sleep(50000);
