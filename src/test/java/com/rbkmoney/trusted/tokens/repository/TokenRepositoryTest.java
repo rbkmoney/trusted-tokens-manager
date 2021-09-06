@@ -1,7 +1,7 @@
 package com.rbkmoney.trusted.tokens.repository;
 
 import com.rbkmoney.trusted.tokens.ConditionTemplate;
-import com.rbkmoney.trusted.tokens.config.RiakAbstractTestContainer;
+import com.rbkmoney.trusted.tokens.config.RiakAbstractTestIntegration;
 import com.rbkmoney.trusted.tokens.converter.CardTokenToRowConverter;
 import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
@@ -14,7 +14,7 @@ import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class TokenRepositoryTest extends RiakAbstractTestContainer {
+public class TokenRepositoryTest extends RiakAbstractTestIntegration {
 
     private static final String KEY = "key";
 
@@ -32,8 +32,7 @@ public class TokenRepositoryTest extends RiakAbstractTestContainer {
         sleep(50000);
         CardTokenData emptyCardTokenData = trustedTokenRepository.get(KEY, CardTokenData.class, tokenBucketName);
 
-        assertNull(emptyCardTokenData.getPayments());
-        assertNull(emptyCardTokenData.getWithdrawals());
+        assertNull(emptyCardTokenData);
 
         trustedTokenRepository.create(
                 cardTokenToRowConverter.convert(KEY, createCardTokenData()),
@@ -50,8 +49,7 @@ public class TokenRepositoryTest extends RiakAbstractTestContainer {
         ConditionTemplate emptyConditionTemplate =
                 trustedTokenRepository.get(KEY, ConditionTemplate.class, templateBucketName);
 
-        assertNull(emptyConditionTemplate.getPaymentsConditions());
-        assertNull(emptyConditionTemplate.getWithdrawalsConditions());
+        assertNull(emptyConditionTemplate);
 
         trustedTokenRepository.create(
                 templateToRowConverter.convert(KEY, createTemplateWithWithdrawalAndPayment()),

@@ -18,7 +18,6 @@ public class CardTokenToRowConverter {
         Row row = new Row();
         row.setKey(cardToken);
         row.setValue(initValue(cardTokenData));
-        System.out.println(row);
         return row;
     }
 

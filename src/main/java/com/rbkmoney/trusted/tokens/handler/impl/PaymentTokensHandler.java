@@ -29,6 +29,7 @@ public class PaymentTokensHandler implements TrustedTokensCommonHandler {
     @Override
     public boolean handler(String cardToken, ConditionTemplate conditionTemplate) {
         CardTokenData cardTokenData = trustedTokenRepository.get(cardToken, CardTokenData.class, bucket);
-        return isTrusted(conditionTemplate.getPaymentsConditions().getConditions(), cardTokenData.getPayments());
+        return cardTokenData != null && isTrusted(conditionTemplate.getPaymentsConditions().getConditions(),
+                cardTokenData.getPayments());
     }
 }

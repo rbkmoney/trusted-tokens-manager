@@ -33,7 +33,7 @@ public class TrustedTokenRepository {
             RiakObject obj = response.getValue(RiakObject.class);
             return obj != null && obj.getValue() != null
                     ? objectMapper.readValue(obj.getValue().toString(), clazz)
-                    : clazz.getDeclaredConstructor().newInstance();
+                    : null;
         } catch (InterruptedException e) {
             log.error("InterruptedException in TokenRepository when get e: ", e);
             Thread.currentThread().interrupt();

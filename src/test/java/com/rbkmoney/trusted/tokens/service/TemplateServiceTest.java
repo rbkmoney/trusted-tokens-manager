@@ -1,7 +1,7 @@
 package com.rbkmoney.trusted.tokens.service;
 
 import com.rbkmoney.trusted.tokens.*;
-import com.rbkmoney.trusted.tokens.config.RiakAbstractTestContainer;
+import com.rbkmoney.trusted.tokens.config.RiakAbstractTestIntegration;
 import com.rbkmoney.trusted.tokens.converter.CardTokenToRowConverter;
 import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
 import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
@@ -14,7 +14,8 @@ import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateRequestUtils.*;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TemplateServiceTest extends RiakAbstractTestContainer {
+public class TemplateServiceTest extends RiakAbstractTestIntegration {
+
     private static final String KEY = "key";
 
     @Autowired

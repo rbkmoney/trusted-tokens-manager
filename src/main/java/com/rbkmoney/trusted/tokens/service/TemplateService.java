@@ -28,7 +28,7 @@ public class TemplateService {
             throws ConditionTemplateAlreadyExists {
         ConditionTemplate conditionTemplate =
                 trustedTokenRepository.get(conditionTemplateRequest.getName(), ConditionTemplate.class, bucket);
-        if (conditionTemplate.isSetPaymentsConditions() || conditionTemplate.isSetWithdrawalsConditions()) {
+        if (conditionTemplate != null) {
             throw new ConditionTemplateAlreadyExists();
         }
         Row row = templateToRowConverter.convert(conditionTemplateRequest.getName(),
@@ -39,7 +39,7 @@ public class TemplateService {
     public boolean isTrusted(String cardToken, String conditionTemplateName) throws TException {
         ConditionTemplate conditionTemplate =
                 trustedTokenRepository.get(conditionTemplateName, ConditionTemplate.class, bucket);
-        if (!conditionTemplate.isSetPaymentsConditions() && !conditionTemplate.isSetWithdrawalsConditions()) {
+        if (conditionTemplate == null) {
             throw new ConditionTemplateNotFound();
         }
         return handlers.stream()

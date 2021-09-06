@@ -20,8 +20,14 @@ import java.time.Duration;
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = TrustedTokensApplication.class,
-        initializers = RiakAbstractTestContainer.Initializer.class)
-public abstract class RiakAbstractTestContainer {
+        initializers = RiakAbstractTestIntegration.Initializer.class)
+public abstract class RiakAbstractTestIntegration {
+
+    @Value("${riak.bucket.token}")
+    public String tokenBucketName;
+
+    @Value("${riak.bucket.template}")
+    public String templateBucketName;
 
     private static final String IMAGE_NAME = "basho/riak-kv";
     @Container
@@ -30,10 +36,6 @@ public abstract class RiakAbstractTestContainer {
             .withPrivilegedMode(true)
             .waitingFor(new WaitAllStrategy()
                     .withStartupTimeout(Duration.ofMinutes(2)));
-    @Value("${riak.bucket.token}")
-    public String tokenBucketName;
-    @Value("${riak.bucket.template}")
-    public String templateBucketName;
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override

@@ -29,7 +29,7 @@ public class WithdrawalTokensHandler implements TrustedTokensCommonHandler {
     @Override
     public boolean handler(String cardToken, ConditionTemplate conditionTemplate) {
         CardTokenData cardTokenData = trustedTokenRepository.get(cardToken, CardTokenData.class, bucket);
-        return isTrusted(conditionTemplate.getWithdrawalsConditions().getConditions(),
+        return cardTokenData != null && isTrusted(conditionTemplate.getWithdrawalsConditions().getConditions(),
                 cardTokenData.getWithdrawals());
     }
 }

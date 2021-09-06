@@ -16,8 +16,8 @@ import java.time.Duration;
 @Slf4j
 @Testcontainers
 @ContextConfiguration(classes = TrustedTokensApplication.class,
-        initializers = KafkaAbstractTestContainer.Initializer.class)
-public abstract class KafkaAbstractTestContainer extends RiakAbstractTestContainer {
+        initializers = KafkaAbstractTestIntegration.Initializer.class)
+public abstract class KafkaAbstractTestIntegration extends RiakAbstractTestIntegration {
 
     private static final String IMAGE_NAME = "confluentinc/cp-kafka";
 
