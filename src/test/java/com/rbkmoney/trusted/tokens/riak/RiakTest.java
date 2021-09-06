@@ -1,6 +1,7 @@
 package com.rbkmoney.trusted.tokens.riak;
 
 import com.rbkmoney.trusted.tokens.ConditionTemplate;
+import com.rbkmoney.trusted.tokens.config.KafkaAbstractTestIntegration;
 import com.rbkmoney.trusted.tokens.config.RiakAbstractTestIntegration;
 import com.rbkmoney.trusted.tokens.converter.CardTokenToRowConverter;
 import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
@@ -17,7 +18,7 @@ import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class RiakTest extends RiakAbstractTestIntegration {
+public class RiakTest extends KafkaAbstractTestIntegration {
 
     @Value("${riak.bucket.token}")
     public String tokenBucketName;
