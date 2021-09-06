@@ -36,7 +36,7 @@ public class TemplateService {
         trustedTokenRepository.create(row, bucket);
     }
 
-    public boolean isTrusted(String cardToken, String conditionTemplateName) throws TException {
+    public boolean isTrustedTokenByTemplateName(String cardToken, String conditionTemplateName) throws TException {
         ConditionTemplate conditionTemplate =
                 trustedTokenRepository.get(conditionTemplateName, ConditionTemplate.class, bucket);
         if (conditionTemplate == null) {

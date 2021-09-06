@@ -35,7 +35,7 @@ public class TrustedTokensHandler implements TrustedTokensSrv.Iface {
     @Override
     public boolean isTokenTrustedByConditionTemplateName(String cardToken, String conditionTemplateName)
             throws InvalidRequest, ConditionTemplateNotFound, TException {
-        return templateService.isTrusted(cardToken, conditionTemplateName);
+        return templateService.isTrustedTokenByTemplateName(cardToken, conditionTemplateName);
     }
 
     @Override

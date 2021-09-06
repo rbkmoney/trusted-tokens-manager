@@ -26,37 +26,24 @@ public class TemplateServiceTest extends RiakAbstractTestIntegration {
     private CardTokenToRowConverter cardTokenToRowConverter;
 
     @Test
-    public void createTemplateTest() throws InterruptedException, TException {
+    public void templateServiceTest() throws InterruptedException, TException {
         sleep(50000);
 
         ConditionTemplate emptyConditionTemplate =
                 trustedTokenRepository.get(CONDITION_NAME, ConditionTemplate.class, templateBucketName);
 
-        assertNull(emptyConditionTemplate.getPaymentsConditions());
-        assertNull(emptyConditionTemplate.getWithdrawalsConditions());
-
-        templateService.createTemplate(createTemplateRequestWithTwoConditions());
-
-        assertThrows(ConditionTemplateAlreadyExists.class,
-                () -> templateService.createTemplate(createTemplateRequestWithTwoConditions()));
-
-        ConditionTemplate conditionTemplateUp =
-                trustedTokenRepository.get(CONDITION_NAME, ConditionTemplate.class, templateBucketName);
-
-        assertNotNull(conditionTemplateUp.getPaymentsConditions());
-        assertNotNull(conditionTemplateUp.getWithdrawalsConditions());
-    }
-
-    @Test
-    public void isTrusted() throws InterruptedException, TException {
-        sleep(50000);
-        assertThrows(ConditionTemplateNotFound.class, () -> templateService.isTrusted(TOKEN, CONDITION_NAME));
+        assertNull(emptyConditionTemplate);
+        assertThrows(ConditionTemplateNotFound.class, () ->
+                templateService.isTrustedTokenByTemplateName(TOKEN, CONDITION_NAME));
 
         templateService.createTemplate(createTrueTemplateRequest());
         trustedTokenRepository.create(
                 cardTokenToRowConverter.convert(TOKEN, createCardTokenData()), tokenBucketName);
-        assertTrue(templateService.isTrusted(TOKEN, CONDITION_NAME));
-        assertTrue(templateService.isTrusted(TOKEN, CONDITION_NAME));
+
+        assertTrue(templateService.isTrustedTokenByTemplateName(TOKEN, CONDITION_NAME));
+        assertTrue(templateService.isTrustedTokenByTemplateName(TOKEN, CONDITION_NAME));
+        assertThrows(ConditionTemplateAlreadyExists.class,
+                () -> templateService.createTemplate(createTemplateRequestWithTwoConditions()));
 
     }
 }
