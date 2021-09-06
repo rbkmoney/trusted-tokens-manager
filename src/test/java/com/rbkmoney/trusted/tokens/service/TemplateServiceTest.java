@@ -3,7 +3,6 @@ package com.rbkmoney.trusted.tokens.service;
 import com.rbkmoney.trusted.tokens.*;
 import com.rbkmoney.trusted.tokens.config.RiakAbstractTestIntegration;
 import com.rbkmoney.trusted.tokens.converter.CardTokenToRowConverter;
-import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
 import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.Test;
@@ -11,21 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateRequestUtils.*;
+import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.TOKEN;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TemplateServiceTest extends RiakAbstractTestIntegration {
-
-    private static final String KEY = "key";
 
     @Autowired
     private TrustedTokenRepository trustedTokenRepository;
 
     @Autowired
     private TemplateService templateService;
-
-    @Autowired
-    private TemplateToRowConverter templateToRowConverter;
 
     @Autowired
     private CardTokenToRowConverter cardTokenToRowConverter;
@@ -55,13 +50,13 @@ public class TemplateServiceTest extends RiakAbstractTestIntegration {
     @Test
     public void isTrusted() throws InterruptedException, TException {
         sleep(50000);
-        assertThrows(ConditionTemplateNotFound.class, () -> templateService.isTrusted(KEY, CONDITION_NAME));
+        assertThrows(ConditionTemplateNotFound.class, () -> templateService.isTrusted(TOKEN, CONDITION_NAME));
 
         templateService.createTemplate(createTrueTemplateRequest());
         trustedTokenRepository.create(
-                cardTokenToRowConverter.convert(KEY, createCardTokenData()), tokenBucketName);
-        assertTrue(templateService.isTrusted(KEY, CONDITION_NAME));
-        assertTrue(templateService.isTrusted(KEY, CONDITION_NAME));
+                cardTokenToRowConverter.convert(TOKEN, createCardTokenData()), tokenBucketName);
+        assertTrue(templateService.isTrusted(TOKEN, CONDITION_NAME));
+        assertTrue(templateService.isTrusted(TOKEN, CONDITION_NAME));
 
     }
 }

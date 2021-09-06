@@ -25,7 +25,9 @@ public class PaymentService {
 
     public void processPayment(Payment payment) {
         String token = payment.getPaymentTool().getBankCard().getToken();
-        CardTokenData cardTokenData = trustedTokenRepository.get(token, CardTokenData.class, bucket);
+        CardTokenData cardTokenData =
+                Optional.ofNullable(trustedTokenRepository.get(token, CardTokenData.class, bucket))
+                        .orElse(new CardTokenData());
         CardToken cardToken = transactionToCardTokenConverter.convertPaymentToCardToken(payment);
         Map<String, CardTokenData.CurrencyData> currencyMap = Optional.ofNullable(cardTokenData.getPayments())
                 .orElse(new HashMap<>());

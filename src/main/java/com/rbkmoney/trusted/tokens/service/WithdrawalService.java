@@ -14,7 +14,7 @@ import java.util.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class WitdrawalService {
+public class WithdrawalService {
 
     private final CardTokenToCardDataConverter cardTokenToCardDataConverter;
     private final TransactionToCardTokenConverter transactionToCardTokenConverter;
@@ -25,7 +25,9 @@ public class WitdrawalService {
 
     public void processWithdrawal(Withdrawal withdrawal) {
         String token = withdrawal.getDestinationResource().getBankCard().getToken();
-        CardTokenData cardTokenData = trustedTokenRepository.get(token, CardTokenData.class, bucket);
+        CardTokenData cardTokenData =
+                Optional.ofNullable(trustedTokenRepository.get(token, CardTokenData.class, bucket))
+                        .orElse(new CardTokenData());
         CardToken cardToken = transactionToCardTokenConverter.convertWithdrawalToCardToken(withdrawal);
         Map<String, CardTokenData.CurrencyData> currencyMap = Optional.ofNullable(cardTokenData.getWithdrawals())
                 .orElse(new HashMap<>());

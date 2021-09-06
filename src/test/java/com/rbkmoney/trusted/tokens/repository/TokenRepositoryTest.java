@@ -10,13 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.createTemplateWithWithdrawalAndPayment;
+import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.TOKEN;
 import static java.lang.Thread.sleep;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class TokenRepositoryTest extends RiakAbstractTestIntegration {
-
-    private static final String KEY = "key";
 
     @Autowired
     private TrustedTokenRepository trustedTokenRepository;
@@ -30,14 +29,14 @@ public class TokenRepositoryTest extends RiakAbstractTestIntegration {
     @Test
     public void riakTestCardTokenData() throws InterruptedException {
         sleep(50000);
-        CardTokenData emptyCardTokenData = trustedTokenRepository.get(KEY, CardTokenData.class, tokenBucketName);
+        CardTokenData emptyCardTokenData = trustedTokenRepository.get(TOKEN, CardTokenData.class, tokenBucketName);
 
         assertNull(emptyCardTokenData);
 
         trustedTokenRepository.create(
-                cardTokenToRowConverter.convert(KEY, createCardTokenData()),
+                cardTokenToRowConverter.convert(TOKEN, createCardTokenData()),
                 tokenBucketName);
-        CardTokenData cardTokenData = trustedTokenRepository.get(KEY, CardTokenData.class, tokenBucketName);
+        CardTokenData cardTokenData = trustedTokenRepository.get(TOKEN, CardTokenData.class, tokenBucketName);
 
         assertNotNull(cardTokenData.getPayments());
         assertNotNull(cardTokenData.getWithdrawals());
@@ -47,15 +46,15 @@ public class TokenRepositoryTest extends RiakAbstractTestIntegration {
     public void riakTestConditionTemplate() throws InterruptedException {
         sleep(50000);
         ConditionTemplate emptyConditionTemplate =
-                trustedTokenRepository.get(KEY, ConditionTemplate.class, templateBucketName);
+                trustedTokenRepository.get(TOKEN, ConditionTemplate.class, templateBucketName);
 
         assertNull(emptyConditionTemplate);
 
         trustedTokenRepository.create(
-                templateToRowConverter.convert(KEY, createTemplateWithWithdrawalAndPayment()),
+                templateToRowConverter.convert(TOKEN, createTemplateWithWithdrawalAndPayment()),
                 templateBucketName);
         ConditionTemplate conditionTemplate =
-                trustedTokenRepository.get(KEY, ConditionTemplate.class, templateBucketName);
+                trustedTokenRepository.get(TOKEN, ConditionTemplate.class, templateBucketName);
 
         assertNotNull(conditionTemplate.getPaymentsConditions());
         assertNotNull(conditionTemplate.getWithdrawalsConditions());

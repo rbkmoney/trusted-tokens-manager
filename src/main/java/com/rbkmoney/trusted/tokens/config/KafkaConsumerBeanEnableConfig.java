@@ -3,7 +3,7 @@ package com.rbkmoney.trusted.tokens.config;
 import com.rbkmoney.trusted.tokens.listener.PaymentKafkaListener;
 import com.rbkmoney.trusted.tokens.listener.WithdrawalKafkaListener;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
-import com.rbkmoney.trusted.tokens.service.WitdrawalService;
+import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +21,8 @@ public class KafkaConsumerBeanEnableConfig {
 
     @Bean
     @ConditionalOnProperty(value = "kafka.topics.withdrawal.enabled", havingValue = "true")
-    public WithdrawalKafkaListener withdrawalKafkaListener(WitdrawalService witdrawalService) {
-        return new WithdrawalKafkaListener(witdrawalService);
+    public WithdrawalKafkaListener withdrawalKafkaListener(WithdrawalService withdrawalService) {
+        return new WithdrawalKafkaListener(withdrawalService);
     }
 
 }

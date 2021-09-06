@@ -1,9 +1,5 @@
 package com.rbkmoney.trusted.tokens.converter;
 
-import com.rbkmoney.damsel.domain.Cash;
-import com.rbkmoney.damsel.domain.CurrencyRef;
-import com.rbkmoney.damsel.fraudbusters.Payment;
-import com.rbkmoney.damsel.fraudbusters.Withdrawal;
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
 import com.rbkmoney.trusted.tokens.model.CardToken;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
@@ -15,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.LocalDateTime;
 
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
+import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.createPayment;
+import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.createWithdrawal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -23,10 +21,13 @@ class CardTokenToCardDataConverterTest {
 
     private final int currentYear = LocalDateTime.now().getYear();
     private final int currentMonth = LocalDateTime.now().getMonthValue();
+
     @Autowired
-    CardTokenToCardDataConverter cardTokenToCardDataConverter;
+    private CardTokenToCardDataConverter cardTokenToCardDataConverter;
+
     @Autowired
-    TransactionToCardTokenConverter transactionToCardTokenConverter;
+    private TransactionToCardTokenConverter transactionToCardTokenConverter;
+
     private CardTokenData cardTokenData;
     private CardToken paymentCardToken;
     private CardToken withdrawalCardToken;
@@ -68,22 +69,11 @@ class CardTokenToCardDataConverterTest {
     }
 
     private CardToken createPaymentCardToken() {
-        Payment payment = new Payment();
-        Cash cash = new Cash();
-        cash.setCurrency(new CurrencyRef().setSymbolicCode("RUB"));
-        cash.setAmount(1000);
-        payment.setCost(cash);
-        payment.setEventTime(String.valueOf(LocalDateTime.now()));
-        return transactionToCardTokenConverter.convertPaymentToCardToken(payment);
+        return transactionToCardTokenConverter.convertPaymentToCardToken(createPayment());
     }
 
     private CardToken createWithdrawalCardToken() {
-        Withdrawal withdrawal = new Withdrawal();
-        Cash cash = new Cash();
-        cash.setCurrency(new CurrencyRef().setSymbolicCode("RUB"));
-        withdrawal.setCost(cash);
-        withdrawal.setEventTime(String.valueOf(LocalDateTime.now()));
-        return transactionToCardTokenConverter.convertWithdrawalToCardToken(withdrawal);
+        return transactionToCardTokenConverter.convertWithdrawalToCardToken(createWithdrawal());
     }
 
 }

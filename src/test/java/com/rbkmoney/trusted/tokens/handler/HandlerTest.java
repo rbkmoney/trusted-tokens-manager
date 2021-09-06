@@ -15,17 +15,21 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateRequestUtils.*;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.*;
+import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.TOKEN;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = TrustedTokensApplication.class)
 class HandlerTest {
-    private static final String TOKEN = "token";
+
     @MockBean
     TrustedTokenRepository trustedTokenRepository;
+
     @Autowired
     TrustedTokensHandler trustedTokensHandler;
+
     @Value("${riak.bucket.token}")
     private String tokenBucketName;
+
     @Value("${riak.bucket.template}")
     private String templateBucketName;
 
