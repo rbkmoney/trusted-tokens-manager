@@ -59,7 +59,8 @@ public class WithdrawalServiceTest extends RiakAbstractTestIntegration {
         assertNull(cardTokenDataUpdate.getPayments());
         assertEquals(1, cardTokenDataUpdate.getWithdrawals().size());
         assertTrue(cardTokenDataUpdate.getWithdrawals().containsKey("RUB"));
-        assertTrue(cardTokenDataUpdate.getWithdrawals().get("RUB").getYears().containsKey(LocalDateTime.now().getYear()));
+        assertTrue(cardTokenDataUpdate.getWithdrawals().get("RUB").getYears()
+                .containsKey(LocalDateTime.now().getYear()));
         assertEquals(2,
                 cardTokenDataUpdate.getWithdrawals().get("RUB").getYears()
                         .get(LocalDateTime.now().getYear()).getYearCount());
