@@ -6,6 +6,7 @@ import com.rbkmoney.trusted.tokens.converter.CardTokenToRowConverter;
 import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +36,11 @@ public class RiakTest extends RiakAbstractTestIntegration {
 
     @Autowired
     private TemplateToRowConverter templateToRowConverter;
+
+    @BeforeAll
+    public static void beforeAll() {
+        riak.start();
+    }
 
     @Test
     public void riakTest() throws InterruptedException {
