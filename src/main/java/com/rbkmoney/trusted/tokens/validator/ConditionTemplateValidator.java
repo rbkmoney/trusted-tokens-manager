@@ -4,7 +4,7 @@ import com.rbkmoney.trusted.tokens.ConditionTemplate;
 import com.rbkmoney.trusted.tokens.InvalidRequest;
 import org.springframework.stereotype.Component;
 
-import static com.rbkmoney.trusted.tokens.constants.Errors.INVALID_REQUEST_CONDITIONS;
+import static com.rbkmoney.trusted.tokens.constants.ExceptionErrors.INVALID_REQUEST_CONDITIONS;
 import static com.rbkmoney.trusted.tokens.validator.ConditionsValidator.validatePaymentsConditions;
 import static com.rbkmoney.trusted.tokens.validator.ConditionsValidator.validateWithdrawalConditions;
 

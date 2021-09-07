@@ -18,7 +18,7 @@ import java.util.*;
 public class PaymentService {
 
     private final CardTokenDataConverter cardTokenDataConverter;
-    private final CardTokenConverter cardTokenConverter;
+    private final TransactionToCardTokenConverter transactionToCardTokenConverter;
     private final TrustedTokenRepository trustedTokenRepository;
     private final RowConverter rowConverter;
     private final ObjectMapper objectMapper;
@@ -30,7 +30,7 @@ public class PaymentService {
         CardTokenData cardTokenData =
                 Optional.ofNullable(trustedTokenRepository.get(token, CardTokenData.class, bucket))
                         .orElse(new CardTokenData());
-        CardToken cardToken = cardTokenConverter.convertPaymentToCardToken(payment);
+        CardToken cardToken = transactionToCardTokenConverter.convertPaymentToCardToken(payment);
         Map<String, CardTokenData.CurrencyData> currencyMap = Optional.ofNullable(cardTokenData.getPayments())
                 .orElse(new HashMap<>());
         cardTokenData.setPayments(cardTokenDataConverter.convert(cardToken, currencyMap));

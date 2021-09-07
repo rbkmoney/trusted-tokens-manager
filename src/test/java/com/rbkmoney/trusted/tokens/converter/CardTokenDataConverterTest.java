@@ -26,7 +26,7 @@ class CardTokenDataConverterTest {
     private CardTokenDataConverter cardTokenDataConverter;
 
     @Autowired
-    private CardTokenConverter cardTokenConverter;
+    private TransactionToCardTokenConverter transactionToCardTokenConverter;
 
     private CardTokenData cardTokenData;
     private CardToken paymentCardToken;
@@ -69,11 +69,11 @@ class CardTokenDataConverterTest {
     }
 
     private CardToken createPaymentCardToken() {
-        return cardTokenConverter.convertPaymentToCardToken(createPayment());
+        return transactionToCardTokenConverter.convertPaymentToCardToken(createPayment());
     }
 
     private CardToken createWithdrawalCardToken() {
-        return cardTokenConverter.convertWithdrawalToCardToken(createWithdrawal());
+        return transactionToCardTokenConverter.convertWithdrawalToCardToken(createWithdrawal());
     }
 
 }

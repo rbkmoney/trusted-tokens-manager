@@ -6,7 +6,7 @@ import com.rbkmoney.trusted.tokens.InvalidRequest;
 import java.util.List;
 import java.util.Objects;
 
-import static com.rbkmoney.trusted.tokens.constants.Errors.*;
+import static com.rbkmoney.trusted.tokens.constants.ExceptionErrors.*;
 
 public class ConditionsValidator {
 
@@ -34,19 +34,19 @@ public class ConditionsValidator {
 
     public static void requireCountNonZero(int count) throws InvalidRequest {
         if (count <= 0) {
-            throw new InvalidRequest(ZERO_COUNT);
+            throw new InvalidRequest(COUNT_REQUIRE);
         }
     }
 
     public static void requireSumNonZero(long sum) throws InvalidRequest {
         if (sum <= 0) {
-            throw new InvalidRequest(ZERO_SUM);
+            throw new InvalidRequest(SUM_REQUIRE);
         }
     }
 
     public static void requireZero(long sum) throws InvalidRequest {
         if (sum > 0) {
-            throw new InvalidRequest(SUM_IN_WITHDRAWAL);
+            throw new InvalidRequest(INVALID_SUM_IN_WITHDRAWAL);
         }
     }
 }

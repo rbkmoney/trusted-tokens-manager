@@ -6,19 +6,19 @@ import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import java.util.List;
 import java.util.Map;
 
-import static com.rbkmoney.trusted.tokens.handler.utis.CurrencyCheck.isCurrencyTrusted;
+import static com.rbkmoney.trusted.tokens.handler.utis.CurrencyDataTrustedResult.isCurrencyDataTrusted;
 
-public class TrustedCheck {
+public class ConditionTrustedResult {
 
     public static boolean isTrusted(List<Condition> conditions,
                                     Map<String, CardTokenData.CurrencyData> currencies) {
-        boolean trustedCheck = false;
+        boolean conditionTrusted = false;
         for (Condition condition : conditions) {
-            trustedCheck = isCurrencyTrusted(currencies, condition);
-            if (!trustedCheck) {
+            conditionTrusted = isCurrencyDataTrusted(currencies, condition);
+            if (!conditionTrusted) {
                 break;
             }
         }
-        return trustedCheck;
+        return conditionTrusted;
     }
 }

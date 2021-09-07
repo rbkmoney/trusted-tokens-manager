@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.rbkmoney.trusted.tokens.constants.Errors.INVALID_REQUEST_CONDITIONS;
+import static com.rbkmoney.trusted.tokens.constants.ExceptionErrors.INVALID_REQUEST_CONDITIONS;
 
 
 @Component
