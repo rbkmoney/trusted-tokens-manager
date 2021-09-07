@@ -108,7 +108,19 @@
             <groupId>com.basho.riak</groupId>
             <artifactId>riak-client</artifactId>
             <version>2.1.1</version>
+            <exclusions>
+                <exclusion>
+                        <groupId>org.erlang.otp</groupId>
+                        <artifactId>jinterface</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
+        <dependency>
+            <groupId>clojang</groupId>
+            <artifactId>erlang-jinterface</artifactId>
+            <version>1.10-1</version>
+        </dependency>
+
         <!--test-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
