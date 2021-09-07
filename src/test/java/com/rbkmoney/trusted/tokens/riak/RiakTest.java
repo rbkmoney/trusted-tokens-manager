@@ -19,25 +19,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
-public class RiakTest extends RiakAbstractTestIntegration {
+class RiakTest extends RiakAbstractTestIntegration {
 
     @Value("${riak.bucket.token}")
-    public String tokenBucketName;
+    String tokenBucketName;
 
     @Value("${riak.bucket.template}")
-    public String templateBucketName;
+    String templateBucketName;
 
     @Autowired
-    private TrustedTokenRepository trustedTokenRepository;
+    TrustedTokenRepository trustedTokenRepository;
 
     @Autowired
-    private CardTokenToRowConverter cardTokenToRowConverter;
+    CardTokenToRowConverter cardTokenToRowConverter;
 
     @Autowired
-    private TemplateToRowConverter templateToRowConverter;
+    TemplateToRowConverter templateToRowConverter;
 
     @Test
-    public void riakTest() throws InterruptedException {
+    void riakTest() throws InterruptedException {
         sleep(50000);
         CardTokenData emptyCardTokenData = trustedTokenRepository.get(TOKEN, CardTokenData.class, tokenBucketName);
 

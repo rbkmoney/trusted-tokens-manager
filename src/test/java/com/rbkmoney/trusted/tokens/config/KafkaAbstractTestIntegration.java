@@ -25,7 +25,7 @@ public abstract class KafkaAbstractTestIntegration {
     private static final String PLATFORM_VERSION = "6.1.2";
 
     @Container
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse(IMAGE_NAME)
+    protected static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse(IMAGE_NAME)
             .withTag(PLATFORM_VERSION))
             .withEmbeddedZookeeper()
             .withStartupTimeout(Duration.ofMinutes(2));

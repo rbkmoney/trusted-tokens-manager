@@ -21,7 +21,7 @@ public abstract class RiakAbstractTestIntegration extends KafkaAbstractTestInteg
     private static final String IMAGE_NAME = "basho/riak-kv";
 
     @Container
-    public static GenericContainer riak = new GenericContainer(IMAGE_NAME)
+    public static final GenericContainer riak = new GenericContainer(IMAGE_NAME)
             .withExposedPorts(8098, 8087)
             .withPrivilegedMode(true)
             .waitingFor(new WaitAllStrategy()
