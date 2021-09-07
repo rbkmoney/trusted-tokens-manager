@@ -1,8 +1,7 @@
 package com.rbkmoney.trusted.tokens.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rbkmoney.damsel.fraudbusters.Withdrawal;
-import com.rbkmoney.trusted.tokens.converter.*;
+import com.rbkmoney.trusted.tokens.converter.CardTokenDataConverter;
+import com.rbkmoney.trusted.tokens.converter.RowConverter;
 import com.rbkmoney.trusted.tokens.model.*;
 import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,23 +17,21 @@ import java.util.*;
 public class WithdrawalService {
 
     private final CardTokenDataConverter cardTokenDataConverter;
-    private final TransactionToCardTokenConverter transactionToCardTokenConverter;
     private final TrustedTokenRepository trustedTokenRepository;
     private final RowConverter rowConverter;
-    private final ObjectMapper objectMapper;
     @Value("${riak.bucket.token}")
     private String bucket;
 
-    public void processWithdrawal(Withdrawal withdrawal) {
-        String token = withdrawal.getDestinationResource().getBankCard().getToken();
+    public void processWithdrawal(CardToken cardToken) {
         CardTokenData cardTokenData =
-                Optional.ofNullable(trustedTokenRepository.get(token, CardTokenData.class, bucket))
+                Optional.ofNullable(trustedTokenRepository.get(cardToken.getToken(), CardTokenData.class, bucket))
                         .orElse(new CardTokenData());
-        CardToken cardToken = transactionToCardTokenConverter.convertWithdrawalToCardToken(withdrawal);
-        Map<String, CardTokenData.CurrencyData> currencyMap = Optional.ofNullable(cardTokenData.getWithdrawals())
-                .orElse(new HashMap<>());
-        cardTokenData.setWithdrawals(cardTokenDataConverter.convert(cardToken, currencyMap));
-        Row row = rowConverter.convert(token, cardTokenData);
+        Map<String, CardTokenData.CurrencyData> currencyDataMap = cardTokenDataConverter.convert(
+                cardToken,
+                Optional.ofNullable(cardTokenData.getWithdrawals())
+                        .orElse(new HashMap<>()));
+        cardTokenData.setWithdrawals(currencyDataMap);
+        Row row = rowConverter.convert(cardToken.getToken(), cardTokenData);
         trustedTokenRepository.create(row, bucket);
     }
 

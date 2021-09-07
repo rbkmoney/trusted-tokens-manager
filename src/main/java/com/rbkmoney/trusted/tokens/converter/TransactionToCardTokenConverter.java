@@ -13,6 +13,7 @@ public class TransactionToCardTokenConverter {
     public CardToken convertPaymentToCardToken(Payment payment) {
         LocalDateTime localDateTime = LocalDateTime.parse(payment.getEventTime());
         return CardToken.builder()
+                .token(payment.getPaymentTool().getBankCard().getToken())
                 .currency(payment.getCost().getCurrency().getSymbolicCode())
                 .amount(payment.getCost().getAmount())
                 .year(localDateTime.getYear())
@@ -23,6 +24,7 @@ public class TransactionToCardTokenConverter {
     public CardToken convertWithdrawalToCardToken(Withdrawal withdrawal) {
         LocalDateTime localDateTime = LocalDateTime.parse(withdrawal.getEventTime());
         return CardToken.builder()
+                .token(withdrawal.getDestinationResource().getBankCard().getToken())
                 .currency(withdrawal.getCost().getCurrency().getSymbolicCode())
                 .year(localDateTime.getYear())
                 .month(localDateTime.getMonth().getValue())
