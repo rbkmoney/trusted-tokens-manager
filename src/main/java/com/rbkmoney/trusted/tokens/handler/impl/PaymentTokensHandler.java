@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static com.rbkmoney.trusted.tokens.calculater.ConditionTrustedResult.isTrusted;
+import static com.rbkmoney.trusted.tokens.calculator.ConditionTrustedResult.isTrusted;
 
 
 @Component

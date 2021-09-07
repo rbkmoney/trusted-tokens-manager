@@ -1,12 +1,12 @@
-package com.rbkmoney.trusted.tokens.calculater;
+package com.rbkmoney.trusted.tokens.calculator;
 
 import com.rbkmoney.trusted.tokens.Condition;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 
 import java.util.Map;
 
-import static com.rbkmoney.trusted.tokens.calculater.YearsCountCalc.getCountYears;
-import static com.rbkmoney.trusted.tokens.calculater.YearsSumCalc.getSumYears;
+import static com.rbkmoney.trusted.tokens.calculator.YearsCountCalc.getCountYears;
+import static com.rbkmoney.trusted.tokens.calculator.YearsSumCalc.getSumYears;
 
 public class CurrencyDataTrustedResult {
 

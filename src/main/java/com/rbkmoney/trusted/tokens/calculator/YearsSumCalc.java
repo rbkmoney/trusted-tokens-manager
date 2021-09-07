@@ -1,4 +1,4 @@
-package com.rbkmoney.trusted.tokens.calculater;
+package com.rbkmoney.trusted.tokens.calculator;
 
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 
