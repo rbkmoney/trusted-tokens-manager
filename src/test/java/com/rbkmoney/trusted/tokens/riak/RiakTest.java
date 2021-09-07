@@ -1,5 +1,6 @@
 package com.rbkmoney.trusted.tokens.riak;
 
+import com.basho.riak.client.api.RiakClient;
 import com.rbkmoney.trusted.tokens.ConditionTemplate;
 import com.rbkmoney.trusted.tokens.config.RiakAbstractTestIntegration;
 import com.rbkmoney.trusted.tokens.config.RiakConfig;
@@ -38,6 +39,9 @@ class RiakTest extends RiakAbstractTestIntegration {
 
     @Autowired
     TemplateToRowConverter templateToRowConverter;
+
+    @Autowired
+    RiakClient client;
 
     @Test
     void riakTest() throws InterruptedException {
