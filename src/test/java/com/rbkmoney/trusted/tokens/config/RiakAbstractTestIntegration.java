@@ -37,7 +37,7 @@ public abstract class RiakAbstractTestIntegration {
         @Override
         public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
             TestPropertyValues
-                    .of("riak.port=" + riak.getMappedPort(8087))
+                    .of("riak.port=8087")
                     .applyTo(configurableApplicationContext);
         }
     }
