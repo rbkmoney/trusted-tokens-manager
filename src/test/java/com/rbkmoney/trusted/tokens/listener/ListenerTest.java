@@ -4,8 +4,6 @@ import com.rbkmoney.damsel.fraudbusters.PaymentStatus;
 import com.rbkmoney.damsel.fraudbusters.WithdrawalStatus;
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
-import com.rbkmoney.trusted.tokens.listener.PaymentKafkaListener;
-import com.rbkmoney.trusted.tokens.listener.WithdrawalKafkaListener;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
 import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import org.junit.jupiter.api.*;
