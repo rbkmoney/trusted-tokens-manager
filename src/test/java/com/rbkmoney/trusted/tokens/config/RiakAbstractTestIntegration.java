@@ -8,8 +8,11 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.time.Duration;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
@@ -21,7 +24,11 @@ public abstract class RiakAbstractTestIntegration {
     private static final String IMAGE_NAME = "basho/riak-kv";
 
     @Container
-    public static final GenericContainer riak = new GenericContainer(IMAGE_NAME);
+    public static final GenericContainer riak = new GenericContainer(IMAGE_NAME)
+            .withExposedPorts(8098, 8087)
+            .withPrivilegedMode(true)
+            .waitingFor(new WaitAllStrategy()
+                    .withStartupTimeout(Duration.ofMinutes(2)));
 
     public static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
