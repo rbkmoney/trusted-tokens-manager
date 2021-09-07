@@ -109,6 +109,12 @@
             <artifactId>riak-client</artifactId>
             <version>2.1.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.erlang.otp</groupId>
+            <artifactId>jinterface</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+
 
 
         <!--test-->
