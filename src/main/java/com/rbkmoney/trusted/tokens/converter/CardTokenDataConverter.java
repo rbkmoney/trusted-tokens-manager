@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class CardTokenToCardDataConverter {
+public class CardTokenDataConverter {
 
     public Map<String, CardTokenData.CurrencyData> convert(
             CardToken cardToken,

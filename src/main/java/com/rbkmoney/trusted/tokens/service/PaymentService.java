@@ -1,5 +1,6 @@
 package com.rbkmoney.trusted.tokens.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rbkmoney.damsel.fraudbusters.Payment;
 import com.rbkmoney.trusted.tokens.converter.*;
 import com.rbkmoney.trusted.tokens.model.*;
@@ -16,10 +17,11 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PaymentService {
 
-    private final CardTokenToCardDataConverter cardTokenToCardDataConverter;
-    private final TransactionToCardTokenConverter transactionToCardTokenConverter;
+    private final CardTokenDataConverter cardTokenDataConverter;
+    private final CardTokenConverter cardTokenConverter;
     private final TrustedTokenRepository trustedTokenRepository;
-    private final CardTokenToRowConverter cardTokenToRowConverter;
+    private final RowConverter rowConverter;
+    private final ObjectMapper objectMapper;
     @Value("${riak.bucket.token}")
     private String bucket;
 
@@ -28,11 +30,11 @@ public class PaymentService {
         CardTokenData cardTokenData =
                 Optional.ofNullable(trustedTokenRepository.get(token, CardTokenData.class, bucket))
                         .orElse(new CardTokenData());
-        CardToken cardToken = transactionToCardTokenConverter.convertPaymentToCardToken(payment);
+        CardToken cardToken = cardTokenConverter.convertPaymentToCardToken(payment);
         Map<String, CardTokenData.CurrencyData> currencyMap = Optional.ofNullable(cardTokenData.getPayments())
                 .orElse(new HashMap<>());
-        cardTokenData.setPayments(cardTokenToCardDataConverter.convert(cardToken, currencyMap));
-        Row row = cardTokenToRowConverter.convert(token, cardTokenData);
+        cardTokenData.setPayments(cardTokenDataConverter.convert(cardToken, currencyMap));
+        Row row = rowConverter.convert(token, cardTokenData);
         trustedTokenRepository.create(row, bucket);
     }
 

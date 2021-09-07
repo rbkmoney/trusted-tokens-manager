@@ -17,16 +17,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest(classes = TrustedTokensApplication.class)
-class CardTokenToCardDataConverterTest {
+class CardTokenDataConverterTest {
 
     private final int currentYear = LocalDateTime.now().getYear();
     private final int currentMonth = LocalDateTime.now().getMonthValue();
 
     @Autowired
-    private CardTokenToCardDataConverter cardTokenToCardDataConverter;
+    private CardTokenDataConverter cardTokenDataConverter;
 
     @Autowired
-    private TransactionToCardTokenConverter transactionToCardTokenConverter;
+    private CardTokenConverter cardTokenConverter;
 
     private CardTokenData cardTokenData;
     private CardToken paymentCardToken;
@@ -41,7 +41,7 @@ class CardTokenToCardDataConverterTest {
 
     @Test
     void convertPaymentTest() {
-        cardTokenToCardDataConverter.convert(paymentCardToken, cardTokenData.getPayments());
+        cardTokenDataConverter.convert(paymentCardToken, cardTokenData.getPayments());
         assertFalse(cardTokenData.getPayments().get("RUB").getYears()
                 .containsKey(currentYear - 3));
         assertEquals(79000, cardTokenData.getPayments().get("RUB").getYears()
@@ -58,7 +58,7 @@ class CardTokenToCardDataConverterTest {
 
     @Test
     void convertWithdrawalTest() {
-        cardTokenToCardDataConverter.convert(withdrawalCardToken, cardTokenData.getWithdrawals());
+        cardTokenDataConverter.convert(withdrawalCardToken, cardTokenData.getWithdrawals());
         assertFalse(cardTokenData.getWithdrawals().get("RUB").getYears()
                 .containsKey(currentYear - 3));
         assertEquals(79, cardTokenData.getWithdrawals().get("RUB").getYears()
@@ -69,11 +69,11 @@ class CardTokenToCardDataConverterTest {
     }
 
     private CardToken createPaymentCardToken() {
-        return transactionToCardTokenConverter.convertPaymentToCardToken(createPayment());
+        return cardTokenConverter.convertPaymentToCardToken(createPayment());
     }
 
     private CardToken createWithdrawalCardToken() {
-        return transactionToCardTokenConverter.convertWithdrawalToCardToken(createWithdrawal());
+        return cardTokenConverter.convertWithdrawalToCardToken(createWithdrawal());
     }
 
 }

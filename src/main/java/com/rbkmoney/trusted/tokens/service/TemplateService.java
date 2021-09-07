@@ -1,7 +1,7 @@
 package com.rbkmoney.trusted.tokens.service;
 
 import com.rbkmoney.trusted.tokens.*;
-import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
+import com.rbkmoney.trusted.tokens.converter.RowConverter;
 import com.rbkmoney.trusted.tokens.handler.impl.TrustedTokensCommonHandler;
 import com.rbkmoney.trusted.tokens.model.Row;
 import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
@@ -19,26 +19,24 @@ import java.util.List;
 public class TemplateService {
 
     private final TrustedTokenRepository trustedTokenRepository;
-    private final TemplateToRowConverter templateToRowConverter;
+    private final RowConverter rowConverter;
     private final List<TrustedTokensCommonHandler> handlers;
     @Value("${riak.bucket.template}")
     private String bucket;
 
     public void createTemplate(ConditionTemplateRequest conditionTemplateRequest)
             throws ConditionTemplateAlreadyExists {
-        ConditionTemplate conditionTemplate =
-                trustedTokenRepository.get(conditionTemplateRequest.getName(), ConditionTemplate.class, bucket);
+        ConditionTemplate conditionTemplate = getConditionTemplate(conditionTemplateRequest.getName());
         if (conditionTemplate != null) {
             throw new ConditionTemplateAlreadyExists();
         }
-        Row row = templateToRowConverter.convert(conditionTemplateRequest.getName(),
+        Row row = rowConverter.convert(conditionTemplateRequest.getName(),
                 conditionTemplateRequest.getTemplate());
         trustedTokenRepository.create(row, bucket);
     }
 
     public boolean isTrustedTokenByTemplateName(String cardToken, String conditionTemplateName) throws TException {
-        ConditionTemplate conditionTemplate =
-                trustedTokenRepository.get(conditionTemplateName, ConditionTemplate.class, bucket);
+        ConditionTemplate conditionTemplate = getConditionTemplate(conditionTemplateName);
         if (conditionTemplate == null) {
             throw new ConditionTemplateNotFound();
         }
@@ -47,6 +45,10 @@ public class TemplateService {
                 .findFirst()
                 .orElseThrow(ConditionTemplateNotFound::new)
                 .handler(cardToken, conditionTemplate);
+    }
+
+    private ConditionTemplate getConditionTemplate(String conditionTemplateName) {
+        return trustedTokenRepository.get(conditionTemplateName, ConditionTemplate.class, bucket);
     }
 
 }

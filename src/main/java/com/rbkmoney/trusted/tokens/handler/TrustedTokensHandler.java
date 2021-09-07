@@ -34,13 +34,13 @@ public class TrustedTokensHandler implements TrustedTokensSrv.Iface {
 
     @Override
     public boolean isTokenTrustedByConditionTemplateName(String cardToken, String conditionTemplateName)
-            throws InvalidRequest, ConditionTemplateNotFound, TException {
+            throws TException {
         return templateService.isTrustedTokenByTemplateName(cardToken, conditionTemplateName);
     }
 
     @Override
     public void createNewConditionTemplate(ConditionTemplateRequest conditionTemplateRequest)
-            throws InvalidRequest, ConditionTemplateAlreadyExists, TException {
+            throws TException {
         conditionTemplateValidator.validate(conditionTemplateRequest.getTemplate());
         templateService.createTemplate(conditionTemplateRequest);
     }

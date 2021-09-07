@@ -3,6 +3,7 @@ package com.rbkmoney.trusted.tokens.converter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rbkmoney.trusted.tokens.ConditionTemplate;
+import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.model.Row;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -10,20 +11,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TemplateToRowConverter {
+public class RowConverter {
 
     private final ObjectMapper objectMapper;
 
     public Row convert(String conditionTemplateName, ConditionTemplate conditionTemplate) {
-        Row row = new Row();
-        row.setKey(conditionTemplateName);
-        row.setValue(initValue(conditionTemplate));
-        return row;
+        try {
+            Row row = new Row();
+            row.setKey(conditionTemplateName);
+            row.setValue(objectMapper.writeValueAsString(conditionTemplate));
+            return row;
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private String initValue(ConditionTemplate conditionTemplate) {
+    public Row convert(String cardToken, CardTokenData cardTokenData) {
         try {
-            return objectMapper.writeValueAsString(conditionTemplate);
+            Row row = new Row();
+            row.setKey(cardToken);
+            row.setValue(objectMapper.writeValueAsString(cardTokenData));
+            return row;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

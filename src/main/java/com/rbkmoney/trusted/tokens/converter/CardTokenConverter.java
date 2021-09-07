@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 
 @Component
-public class TransactionToCardTokenConverter {
+public class CardTokenConverter {
 
     public CardToken convertPaymentToCardToken(Payment payment) {
         LocalDateTime localDateTime = LocalDateTime.parse(payment.getEventTime());
