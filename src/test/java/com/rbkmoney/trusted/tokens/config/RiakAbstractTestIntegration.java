@@ -1,10 +1,14 @@
 package com.rbkmoney.trusted.tokens.config;
 
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.WaitAllStrategy;
 import org.testcontainers.junit.jupiter.Container;
@@ -12,11 +16,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Duration;
 
-
+@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @ContextConfiguration(classes = TrustedTokensApplication.class,
         initializers = RiakAbstractTestIntegration.Initializer.class)
 @Testcontainers
-public abstract class RiakAbstractTestIntegration extends KafkaAbstractTestIntegration {
+public abstract class RiakAbstractTestIntegration {
 
     private static final String IMAGE_NAME = "basho/riak-kv";
 
