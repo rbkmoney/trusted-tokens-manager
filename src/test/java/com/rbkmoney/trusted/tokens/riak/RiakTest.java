@@ -2,6 +2,7 @@ package com.rbkmoney.trusted.tokens.riak;
 
 import com.rbkmoney.trusted.tokens.ConditionTemplate;
 import com.rbkmoney.trusted.tokens.config.RiakAbstractTestIntegration;
+import com.rbkmoney.trusted.tokens.config.RiakConfig;
 import com.rbkmoney.trusted.tokens.converter.CardTokenToRowConverter;
 import com.rbkmoney.trusted.tokens.converter.TemplateToRowConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.ContextConfiguration;
 
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.createTemplateWithWithdrawalAndPayment;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @SpringBootTest
-@Testcontainers
+@ContextConfiguration(classes = {TrustedTokenRepository.class, RiakConfig.class})
 class RiakTest extends RiakAbstractTestIntegration {
 
     @Value("${riak.bucket.token}")
