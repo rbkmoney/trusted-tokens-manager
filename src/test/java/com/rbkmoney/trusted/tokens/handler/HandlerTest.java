@@ -113,9 +113,6 @@ class HandlerTest {
     void createNewConditionTemplateTest() {
         assertThrows(InvalidRequest.class,
                 () -> trustedTokensHandler.createNewConditionTemplate(createTemplateRequestWithTwoConditions()));
-        assertThrows(ConditionTemplateAlreadyExists.class,
-                () -> trustedTokensHandler.createNewConditionTemplate(
-                        createTrueTemplateRequest().setName("TemplateTrustedPayment")));
         assertThrows(NullPointerException.class,
                 () -> trustedTokensHandler.createNewConditionTemplate(
                         createTemplatePaymentRequestWithNullCurrency()));

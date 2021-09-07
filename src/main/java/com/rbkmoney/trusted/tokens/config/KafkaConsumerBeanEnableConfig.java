@@ -1,5 +1,6 @@
 package com.rbkmoney.trusted.tokens.config;
 
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
 import com.rbkmoney.trusted.tokens.listener.PaymentKafkaListener;
 import com.rbkmoney.trusted.tokens.listener.WithdrawalKafkaListener;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
@@ -15,14 +16,18 @@ public class KafkaConsumerBeanEnableConfig {
 
     @Bean
     @ConditionalOnProperty(value = "kafka.topics.payment.enabled", havingValue = "true")
-    public PaymentKafkaListener paymentEventsKafkaListener(PaymentService paymentService) {
-        return new PaymentKafkaListener(paymentService);
+    public PaymentKafkaListener paymentEventsKafkaListener(
+            PaymentService paymentService,
+            TransactionToCardTokenConverter transactionToCardTokenConverter) {
+        return new PaymentKafkaListener(paymentService, transactionToCardTokenConverter);
     }
 
     @Bean
     @ConditionalOnProperty(value = "kafka.topics.withdrawal.enabled", havingValue = "true")
-    public WithdrawalKafkaListener withdrawalKafkaListener(WithdrawalService withdrawalService) {
-        return new WithdrawalKafkaListener(withdrawalService);
+    public WithdrawalKafkaListener withdrawalKafkaListener(
+            WithdrawalService withdrawalService,
+            TransactionToCardTokenConverter transactionToCardTokenConverter) {
+        return new WithdrawalKafkaListener(withdrawalService, transactionToCardTokenConverter);
     }
 
 }
