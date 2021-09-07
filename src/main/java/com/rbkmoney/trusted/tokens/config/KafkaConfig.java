@@ -1,24 +1,22 @@
 package com.rbkmoney.trusted.tokens.config;
 
-import com.rbkmoney.kafka.common.exception.handler.SeekToCurrentWithSleepBatchErrorHandler;
-import com.rbkmoney.machinegun.eventsink.MachineEvent;
+import com.rbkmoney.damsel.fraudbusters.Payment;
+import com.rbkmoney.damsel.fraudbusters.Withdrawal;
 import com.rbkmoney.trusted.tokens.config.properties.KafkaSslProperties;
-import com.rbkmoney.trusted.tokens.serde.SinkEventDeserializer;
+import com.rbkmoney.trusted.tokens.serde.PaymentDeserializer;
+import com.rbkmoney.trusted.tokens.serde.WithdrawalDeserializer;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.security.auth.SecurityProtocol;
+import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.KafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
-import org.springframework.kafka.listener.ContainerProperties;
 
 import java.io.File;
 import java.util.HashMap;
@@ -47,18 +45,14 @@ public class KafkaConfig {
     @Value("${kafka.topic.withdrawal.concurrency}")
     private int withdrawalConcurrency;
 
-    private Map<String, Object> consumerConfigs(KafkaSslProperties kafkaSslProperties) {
-        Map<String, Object> props = new HashMap<>();
+    public Map<String, Object> createDefaultProperties(KafkaSslProperties kafkaSslProperties) {
+        final Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, SinkEventDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, enableAutoCommit);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
-
         configureSsl(props, kafkaSslProperties);
-
         return props;
     }
 
@@ -77,48 +71,37 @@ public class KafkaConfig {
         }
     }
 
-    @Bean
-    public ConsumerFactory<String, MachineEvent> paymentConsumerFactory(KafkaSslProperties kafkaSslProperties) {
-        Map<String, Object> config = consumerConfigs(kafkaSslProperties);
-        config.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + "-payment");
-        return new DefaultKafkaConsumerFactory<>(config);
-    }
-
-    @Bean
-    public ConsumerFactory<String, MachineEvent> withdrawalConsumerFactory(KafkaSslProperties kafkaSslProperties) {
-        Map<String, Object> config = consumerConfigs(kafkaSslProperties);
-        config.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + "-withdrawal");
-        return new DefaultKafkaConsumerFactory<>(config);
-    }
-
-    @Bean
-    public KafkaListenerContainerFactory
-            <ConcurrentMessageListenerContainer<String, MachineEvent>> kafkaPaymentListenerContainerFactory(
-            ConsumerFactory<String, MachineEvent> paymentConsumerFactory) {
-        var factory = createGeneralKafkaListenerFactory(paymentConsumerFactory);
-        factory.setBatchListener(true);
-        factory.setBatchErrorHandler(new SeekToCurrentWithSleepBatchErrorHandler());
-        factory.setConcurrency(paymentConcurrency);
-        return factory;
-    }
-
-    @Bean
-    public KafkaListenerContainerFactory
-            <ConcurrentMessageListenerContainer<String, MachineEvent>> kafkaWithdrawalListenerContainerFactory(
-            ConsumerFactory<String, MachineEvent> withdrawalConsumerFactory) {
-        var factory = createGeneralKafkaListenerFactory(withdrawalConsumerFactory);
-        factory.setBatchListener(true);
-        factory.setBatchErrorHandler(new SeekToCurrentWithSleepBatchErrorHandler());
-        factory.setConcurrency(withdrawalConcurrency);
-        return factory;
-    }
-
-    private ConcurrentKafkaListenerContainerFactory<String, MachineEvent> createGeneralKafkaListenerFactory(
-            ConsumerFactory<String, MachineEvent> consumerFactory) {
-        var factory = new ConcurrentKafkaListenerContainerFactory<String, MachineEvent>();
+    public <T> ConcurrentKafkaListenerContainerFactory<String, T> createFactory(
+            Deserializer<T> deserializer,
+            Map<String, Object> props,
+            int concurrency) {
+        ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
+        DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                deserializer
+        );
         factory.setConsumerFactory(consumerFactory);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.setConcurrency(concurrency);
+        factory.setBatchListener(true);
         return factory;
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Payment> kafkaPaymentListenerContainerFactory(
+            KafkaSslProperties kafkaSslProperties) {
+        Map<String, Object> prop = createDefaultProperties(kafkaSslProperties);
+        prop.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + "-payment");
+        return createFactory(new PaymentDeserializer(), prop, paymentConcurrency);
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Withdrawal> kafkaWithdrawalListenerContainerFactory(
+            KafkaSslProperties kafkaSslProperties) {
+        Map<String, Object> prop = createDefaultProperties(kafkaSslProperties);
+        prop.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + "-withdrawal");
+        return createFactory(new WithdrawalDeserializer(), prop, withdrawalConcurrency);
     }
 
 }

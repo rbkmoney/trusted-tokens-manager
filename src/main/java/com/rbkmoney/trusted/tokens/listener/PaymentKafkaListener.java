@@ -1,6 +1,7 @@
 package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.Payment;
+import com.rbkmoney.damsel.fraudbusters.PaymentStatus;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +12,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-import static com.rbkmoney.trusted.tokens.constants.TransactionStatus.CAPTURED;
 
 @Slf4j
 @Component
@@ -36,7 +35,7 @@ public class PaymentKafkaListener {
             );
             log.debug("PaymentEventListener listen result payments: {}", payments);
             payments.stream()
-                    .filter(payment -> CAPTURED.equals(payment.getStatus().name()))
+                    .filter(payment -> PaymentStatus.captured.name().equals(payment.getStatus().name()))
                     .map(transactionToCardTokenConverter::convertPaymentToCardToken)
                     .forEach(paymentService::processPayment);
         } catch (Exception e) {

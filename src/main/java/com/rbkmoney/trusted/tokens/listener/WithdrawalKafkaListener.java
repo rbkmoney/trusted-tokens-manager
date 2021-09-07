@@ -1,6 +1,7 @@
 package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.Withdrawal;
+import com.rbkmoney.damsel.fraudbusters.WithdrawalStatus;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
 import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import lombok.RequiredArgsConstructor;
@@ -11,8 +12,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-
-import static com.rbkmoney.trusted.tokens.constants.TransactionStatus.SUCCEEDED;
 
 @Slf4j
 @Component
@@ -30,7 +29,7 @@ public class WithdrawalKafkaListener {
         try {
             log.info("Listen withdrawals size: {} partition: {} offset: {}", withdrawals.size(), partition, offset);
             withdrawals.stream()
-                    .filter(withdrawal -> SUCCEEDED.equals(withdrawal.getStatus().name()))
+                    .filter(withdrawal -> WithdrawalStatus.succeeded.name().equals(withdrawal.getStatus().name()))
                     .map(transactionToCardTokenConverter::convertWithdrawalToCardToken)
                     .forEach(withdrawalService::processWithdrawal);
         } catch (Exception e) {
