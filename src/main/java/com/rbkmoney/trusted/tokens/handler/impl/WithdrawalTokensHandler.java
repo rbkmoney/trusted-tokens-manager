@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static com.rbkmoney.trusted.tokens.handler.utis.ConditionTrustedResult.isTrusted;
+import static com.rbkmoney.trusted.tokens.calculater.ConditionTrustedResult.isTrusted;
 
 
 @Component
@@ -29,7 +29,8 @@ public class WithdrawalTokensHandler implements TrustedTokensCommonHandler {
     @Override
     public boolean handler(String cardToken, ConditionTemplate conditionTemplate) {
         CardTokenData cardTokenData = trustedTokenRepository.get(cardToken, CardTokenData.class, bucket);
-        return cardTokenData != null && isTrusted(conditionTemplate.getWithdrawalsConditions().getConditions(),
+        return cardTokenData != null
+                && isTrusted(conditionTemplate.getWithdrawalsConditions().getConditions(),
                 cardTokenData.getWithdrawals());
     }
 }
