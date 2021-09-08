@@ -10,7 +10,6 @@ build('trusted-tokens', 'java-maven') {
 
     def serviceName = env.REPO_NAME
     def mvnArgs = '-DjvmArgs="-Xmx256m"'
-    env.skipDtrack = true
 
     javaServicePipeline(serviceName, mvnArgs)
 }
