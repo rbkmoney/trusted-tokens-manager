@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TrustedTokenRepository {
 
-    private static final String TEXT_PLAIN = "application/json";
+    private static final String APPLICATION_JSON = "application/json";
     private final RiakClient client;
     private final ObjectMapper objectMapper;
 
@@ -48,7 +48,7 @@ public class TrustedTokenRepository {
         try {
             log.debug("Repository create in row: {}", row);
             RiakObject quoteObject = new RiakObject()
-                    .setContentType(TEXT_PLAIN)
+                    .setContentType(APPLICATION_JSON)
                     .setValue(BinaryValue.create(row.getValue()));
             Location quoteObjectLocation = createLocation(row.getBucket(), row.getKey());
             StoreValue storeOp = new StoreValue.Builder(quoteObject)
