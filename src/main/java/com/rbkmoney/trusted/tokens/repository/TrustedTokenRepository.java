@@ -44,13 +44,13 @@ public class TrustedTokenRepository {
         }
     }
 
-    public void create(Row row, String bucket) {
+    public void create(Row row) {
         try {
-            log.debug("Repository create in bucket: {} row: {}", bucket, row);
+            log.debug("Repository create in row: {}", row);
             RiakObject quoteObject = new RiakObject()
                     .setContentType(TEXT_PLAIN)
                     .setValue(BinaryValue.create(row.getValue()));
-            Location quoteObjectLocation = createLocation(bucket, row.getKey());
+            Location quoteObjectLocation = createLocation(row.getBucket(), row.getKey());
             StoreValue storeOp = new StoreValue.Builder(quoteObject)
                     .withOption(StoreValue.Option.W, Quorum.oneQuorum())
                     .withLocation(quoteObjectLocation)

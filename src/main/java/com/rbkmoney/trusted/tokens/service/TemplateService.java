@@ -31,8 +31,8 @@ public class TemplateService {
             throw new ConditionTemplateAlreadyExists();
         }
         Row row = rowConverter.convert(conditionTemplateRequest.getName(),
-                conditionTemplateRequest.getTemplate());
-        trustedTokenRepository.create(row, bucket);
+                conditionTemplateRequest.getTemplate(), bucket);
+        trustedTokenRepository.create(row);
     }
 
     public boolean isTrustedTokenByTemplateName(String cardToken, String conditionTemplateName) throws TException {

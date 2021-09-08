@@ -22,7 +22,7 @@ public class PaymentService {
     @Value("${riak.bucket.token}")
     private String bucket;
 
-    public void processPayment(CardToken cardToken) {
+    public Row updatePaymentCardTokenData(CardToken cardToken) {
         CardTokenData cardTokenData =
                 Optional.ofNullable(trustedTokenRepository.get(cardToken.getToken(), CardTokenData.class, bucket))
                         .orElse(new CardTokenData());
@@ -31,8 +31,7 @@ public class PaymentService {
                 Optional.ofNullable(cardTokenData.getPayments())
                         .orElse(new HashMap<>()));
         cardTokenData.setPayments(currencyMap);
-        Row row = rowConverter.convert(cardToken.getToken(), cardTokenData);
-        trustedTokenRepository.create(row, bucket);
+        return rowConverter.convert(cardToken.getToken(), cardTokenData, bucket);
     }
 
 }

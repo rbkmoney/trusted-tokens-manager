@@ -3,6 +3,7 @@ package com.rbkmoney.trusted.tokens.listener;
 import com.rbkmoney.damsel.fraudbusters.Payment;
 import com.rbkmoney.damsel.fraudbusters.PaymentStatus;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
+import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ public class PaymentKafkaListener {
 
     private final PaymentService paymentService;
     private final TransactionToCardTokenConverter transactionToCardTokenConverter;
-
+    private final TrustedTokenRepository trustedTokenRepository;
 
     @KafkaListener(topics = "${kafka.topic.payment.id}",
             containerFactory = "kafkaPaymentListenerContainerFactory")
@@ -37,7 +38,8 @@ public class PaymentKafkaListener {
             payments.stream()
                     .filter(payment -> PaymentStatus.captured.name().equals(payment.getStatus().name()))
                     .map(transactionToCardTokenConverter::convertPaymentToCardToken)
-                    .forEach(paymentService::processPayment);
+                    .map(paymentService::updatePaymentCardTokenData)
+                    .forEach(trustedTokenRepository::create);
         } catch (Exception e) {
             log.warn("Error when payments listen e: ", e);
             throw e;
