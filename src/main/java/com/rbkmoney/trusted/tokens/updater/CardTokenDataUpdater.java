@@ -1,7 +1,7 @@
 package com.rbkmoney.trusted.tokens.updater;
 
-import com.rbkmoney.trusted.tokens.model.CardToken;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -12,11 +12,11 @@ import static com.rbkmoney.trusted.tokens.updater.YearsDataUpdater.updateYearsDa
 public class CardTokenDataUpdater {
 
     public Map<String, CardTokenData.CurrencyData> updateCurrencyData(
-            CardToken cardToken,
+            CardTokensPaymentInfo cardTokensPaymentInfo,
             Map<String, CardTokenData.CurrencyData> currencyMap) {
 
-        currencyMap.put(cardToken.getCurrency(), CardTokenData.CurrencyData.builder()
-                .years(updateYearsData(currencyMap, cardToken))
+        currencyMap.put(cardTokensPaymentInfo.getCurrency(), CardTokenData.CurrencyData.builder()
+                .years(updateYearsData(currencyMap, cardTokensPaymentInfo))
                 .build());
         return currencyMap;
     }

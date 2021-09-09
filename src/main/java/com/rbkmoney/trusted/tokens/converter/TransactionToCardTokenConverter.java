@@ -2,7 +2,7 @@ package com.rbkmoney.trusted.tokens.converter;
 
 import com.rbkmoney.damsel.fraudbusters.Payment;
 import com.rbkmoney.damsel.fraudbusters.Withdrawal;
-import com.rbkmoney.trusted.tokens.model.CardToken;
+import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 @Component
 public class TransactionToCardTokenConverter {
 
-    public CardToken convertPaymentToCardToken(Payment payment) {
+    public CardTokensPaymentInfo convertPaymentToCardToken(Payment payment) {
         LocalDateTime localDateTime = LocalDateTime.parse(payment.getEventTime());
-        return CardToken.builder()
+        return CardTokensPaymentInfo.builder()
                 .token(payment.getPaymentTool().getBankCard().getToken())
                 .currency(payment.getCost().getCurrency().getSymbolicCode())
                 .amount(payment.getCost().getAmount())
@@ -21,9 +21,9 @@ public class TransactionToCardTokenConverter {
                 .build();
     }
 
-    public CardToken convertWithdrawalToCardToken(Withdrawal withdrawal) {
+    public CardTokensPaymentInfo convertWithdrawalToCardToken(Withdrawal withdrawal) {
         LocalDateTime localDateTime = LocalDateTime.parse(withdrawal.getEventTime());
-        return CardToken.builder()
+        return CardTokensPaymentInfo.builder()
                 .token(withdrawal.getDestinationResource().getBankCard().getToken())
                 .currency(withdrawal.getCost().getCurrency().getSymbolicCode())
                 .year(localDateTime.getYear())

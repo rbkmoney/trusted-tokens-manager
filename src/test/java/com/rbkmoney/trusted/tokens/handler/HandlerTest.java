@@ -1,14 +1,13 @@
 package com.rbkmoney.trusted.tokens.handler;
 
 import com.rbkmoney.trusted.tokens.*;
-import com.rbkmoney.trusted.tokens.model.CardTokenData;
-import com.rbkmoney.trusted.tokens.repository.TrustedTokenRepository;
+import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
+import com.rbkmoney.trusted.tokens.repository.ConditionTemplateRepository;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -22,45 +21,30 @@ import static org.junit.jupiter.api.Assertions.*;
 class HandlerTest {
 
     @MockBean
-    TrustedTokenRepository trustedTokenRepository;
+    ConditionTemplateRepository conditionTemplateRepository;
+
+    @MockBean
+    CardTokenRepository cardTokenRepository;
 
     @Autowired
     TrustedTokensHandler trustedTokensHandler;
 
-    @Value("${riak.bucket.token}")
-    private String tokenBucketName;
-
-    @Value("${riak.bucket.template}")
-    private String templateBucketName;
-
     @BeforeEach
     public void init() {
-        Mockito.when(trustedTokenRepository.get(TOKEN, CardTokenData.class, tokenBucketName))
+        Mockito.when(cardTokenRepository.get(TOKEN))
                 .thenReturn(createCardTokenData());
-        Mockito.when(trustedTokenRepository.get(
-                "TemplateNotTrustedPayment",
-                ConditionTemplate.class,
-                templateBucketName)).thenReturn(createTemplateNotTrusted(PAYMENT));
-        Mockito.when(trustedTokenRepository.get(
-                "TemplateTrustedPayment",
-                ConditionTemplate.class,
-                templateBucketName)).thenReturn(createTemplateTrusted(PAYMENT));
-        Mockito.when(trustedTokenRepository.get(
-                "TemplateTrustedWithSeveralCurrencyPayment",
-                ConditionTemplate.class,
-                templateBucketName)).thenReturn(createTemplateTrustedWithSeveralCurrency(PAYMENT));
-        Mockito.when(trustedTokenRepository.get(
-                "TemplateNotTrustedWithdrawal",
-                ConditionTemplate.class,
-                templateBucketName)).thenReturn(createTemplateNotTrusted(WITHDRAWAL));
-        Mockito.when(trustedTokenRepository.get(
-                "TemplateTrustedWithdrawal",
-                ConditionTemplate.class,
-                templateBucketName)).thenReturn(createTemplateTrusted(WITHDRAWAL));
-        Mockito.when(trustedTokenRepository.get(
-                "TemplateTrustedWithSeveralCurrencyWithdrawal",
-                ConditionTemplate.class,
-                templateBucketName)).thenReturn(createTemplateTrustedWithSeveralCurrency(WITHDRAWAL));
+        Mockito.when(conditionTemplateRepository.get("TemplateNotTrustedPayment"))
+                .thenReturn(createTemplateNotTrusted(PAYMENT));
+        Mockito.when(conditionTemplateRepository.get("TemplateTrustedPayment"))
+                .thenReturn(createTemplateTrusted(PAYMENT));
+        Mockito.when(conditionTemplateRepository.get("TemplateTrustedWithSeveralCurrencyPayment"))
+                .thenReturn(createTemplateTrustedWithSeveralCurrency(PAYMENT));
+        Mockito.when(conditionTemplateRepository.get("TemplateNotTrustedWithdrawal"))
+                .thenReturn(createTemplateNotTrusted(WITHDRAWAL));
+        Mockito.when(conditionTemplateRepository.get("TemplateTrustedWithdrawal"))
+                .thenReturn(createTemplateTrusted(WITHDRAWAL));
+        Mockito.when(conditionTemplateRepository.get("TemplateTrustedWithSeveralCurrencyWithdrawal"))
+                .thenReturn(createTemplateTrustedWithSeveralCurrency(WITHDRAWAL));
     }
 
     @Test
@@ -84,9 +68,8 @@ class HandlerTest {
         assertThrows(InvalidRequest.class,
                 () -> trustedTokensHandler.isTokenTrusted(TOKEN,
                         createTemplate(null, null)));
-        assertThrows(InvalidRequest.class,
-                () -> trustedTokensHandler.isTokenTrusted(TOKEN,
-                        createTemplateWithWithdrawalAndPayment()));
+        assertTrue(trustedTokensHandler.isTokenTrusted(TOKEN,
+                createTemplateWithWithdrawalAndPayment()));
     }
 
     @Test
@@ -111,8 +94,6 @@ class HandlerTest {
 
     @Test
     void createNewConditionTemplateTest() {
-        assertThrows(InvalidRequest.class,
-                () -> trustedTokensHandler.createNewConditionTemplate(createTemplateRequestWithTwoConditions()));
         assertThrows(NullPointerException.class,
                 () -> trustedTokensHandler.createNewConditionTemplate(
                         createTemplatePaymentRequestWithNullCurrency()));

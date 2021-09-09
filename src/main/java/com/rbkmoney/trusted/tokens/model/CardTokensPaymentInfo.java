@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CardToken {
+public class CardTokensPaymentInfo {
     public String token;
     public String currency;
     public long amount;

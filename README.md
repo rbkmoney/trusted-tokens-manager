@@ -1,1 +1,1 @@
-# trusted-tokens
+# trusted-tokens-manager

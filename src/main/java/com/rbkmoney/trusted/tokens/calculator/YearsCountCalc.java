@@ -13,10 +13,10 @@ public class YearsCountCalc {
                         .filter(year -> year.getKey() > lastYearToCalc)
                         .mapToInt(year -> year.getValue().getYearCount())
                         .sum(),
-                getCountMounts(years.get(lastYearToCalc).getMonths()));
+                getCountMonths(years.get(lastYearToCalc).getMonths()));
     }
 
-    private static int getCountMounts(Map<Integer, CardTokenData.MonthsData> months) {
+    private static int getCountMonths(Map<Integer, CardTokenData.MonthsData> months) {
         Integer currentMonth = LocalDateTime.now().getMonthValue();
         return months.entrySet().stream()
                 .filter(month -> month.getKey() > currentMonth)

@@ -1,5 +1,5 @@
 #!groovy
-build('trusted-tokens', 'java-maven') {
+build('trusted-tokens-manager', 'java-maven') {
     checkoutRepo()
     loadBuildUtils()
 

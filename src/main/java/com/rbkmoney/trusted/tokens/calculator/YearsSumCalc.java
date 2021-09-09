@@ -13,10 +13,10 @@ public class YearsSumCalc {
                         .filter(year -> year.getKey() > lastYearToCalc)
                         .mapToLong(year -> year.getValue().getYearSum())
                         .sum(),
-                getSumMounts(years.get(lastYearToCalc).getMonths()));
+                getSumMonts(years.get(lastYearToCalc).getMonths()));
     }
 
-    private static long getSumMounts(Map<Integer, CardTokenData.MonthsData> months) {
+    private static long getSumMonts(Map<Integer, CardTokenData.MonthsData> months) {
         Integer currentMonth = LocalDateTime.now().getMonthValue();
         return months.entrySet().stream()
                 .filter(month -> month.getKey() > currentMonth)

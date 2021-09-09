@@ -13,10 +13,7 @@ public class ConditionTemplateValidator {
 
     public void validate(ConditionTemplate conditionTemplate) throws InvalidRequest {
 
-        if ((conditionTemplate.isSetPaymentsConditions()
-                && conditionTemplate.isSetWithdrawalsConditions())
-                || (!conditionTemplate.isSetPaymentsConditions()
-                && !conditionTemplate.isSetWithdrawalsConditions())) {
+        if (!conditionTemplate.isSetPaymentsConditions() && !conditionTemplate.isSetWithdrawalsConditions()) {
             throw new InvalidRequest(INVALID_REQUEST_CONDITIONS);
         } else if (conditionTemplate.isSetPaymentsConditions()) {
             validatePaymentsConditions(conditionTemplate.getPaymentsConditions().getConditions());

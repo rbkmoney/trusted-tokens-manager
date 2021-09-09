@@ -1,30 +1,30 @@
 package com.rbkmoney.trusted.tokens.updater;
 
-import com.rbkmoney.trusted.tokens.model.CardToken;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 
 import java.util.*;
 
 public class MothsDataUpdater {
 
     public static Map<Integer, CardTokenData.MonthsData> updateMonthsData(
-            Map<Integer, CardTokenData.YearsData> yearsMap, CardToken cardToken) {
-        int year = cardToken.getYear();
-        int month = cardToken.getMonth();
+            Map<Integer, CardTokenData.YearsData> yearsMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
+        int year = cardTokensPaymentInfo.getYear();
+        int month = cardTokensPaymentInfo.getMonth();
         Map<Integer, CardTokenData.MonthsData> monthMap = Optional.of(yearsMap)
                 .map(map -> map.get(year))
                 .map(CardTokenData.YearsData::getMonths)
                 .orElse(new HashMap<>());
         monthMap.put(month, CardTokenData.MonthsData.builder()
-                .monthSum(updateMonthSum(monthMap, cardToken))
-                .monthCount(updateMonthCount(monthMap, cardToken))
+                .monthSum(updateMonthSum(monthMap, cardTokensPaymentInfo))
+                .monthCount(updateMonthCount(monthMap, cardTokensPaymentInfo))
                 .build());
         return monthMap;
     }
 
-    private static long updateMonthSum(Map<Integer, CardTokenData.MonthsData> monthMap, CardToken cardToken) {
-        long amount = cardToken.getAmount();
-        int month = cardToken.getMonth();
+    private static long updateMonthSum(Map<Integer, CardTokenData.MonthsData> monthMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
+        long amount = cardTokensPaymentInfo.getAmount();
+        int month = cardTokensPaymentInfo.getMonth();
         return Optional.of(monthMap)
                 .map(map -> map.get(month))
                 .map(CardTokenData.MonthsData::getMonthSum)
@@ -32,8 +32,8 @@ public class MothsDataUpdater {
                 .orElse(amount);
     }
 
-    private static int updateMonthCount(Map<Integer, CardTokenData.MonthsData> monthMap, CardToken cardToken) {
-        int month = cardToken.getMonth();
+    private static int updateMonthCount(Map<Integer, CardTokenData.MonthsData> monthMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
+        int month = cardTokensPaymentInfo.getMonth();
         return Optional.of(monthMap)
                 .map(map -> map.get(month))
                 .map(CardTokenData.MonthsData::getMonthCount)

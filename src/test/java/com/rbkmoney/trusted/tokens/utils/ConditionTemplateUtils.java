@@ -2,8 +2,7 @@ package com.rbkmoney.trusted.tokens.utils;
 
 import com.rbkmoney.trusted.tokens.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ConditionTemplateUtils {
 
@@ -35,8 +34,8 @@ public class ConditionTemplateUtils {
         conditions.add(new Condition()
                 .setCurrencySymbolicCode("RUB")
                 .setYearsOffset(YearsOffset.current_with_two_last_years)
-                .setCount(1)
-                .setSum(PAYMENT.equals(type) ? 1000 : 0));
+                .setCount(78)
+                .setSum(PAYMENT.equals(type) ? 78000 : 0));
         conditions.add(new Condition()
                 .setCurrencySymbolicCode("EUR")
                 .setYearsOffset(YearsOffset.current_with_two_last_years)
@@ -49,14 +48,14 @@ public class ConditionTemplateUtils {
         List<Condition> conditions = new ArrayList<>();
         conditions.add(new Condition()
                 .setCurrencySymbolicCode("RUB")
-                .setYearsOffset(YearsOffset.current_with_two_last_years)
-                .setCount(1)
-                .setSum(PAYMENT.equals(type) ? 1000 : 0));
+                .setYearsOffset(YearsOffset.current_year)
+                .setCount(79)
+                .setSum(PAYMENT.equals(type) ? 78000 : 0));
         conditions.add(new Condition()
                 .setCurrencySymbolicCode("EUR")
-                .setYearsOffset(YearsOffset.current_with_two_last_years)
-                .setCount(1)
-                .setSum(PAYMENT.equals(type) ? 1000 : 0));
+                .setYearsOffset(YearsOffset.current_year)
+                .setCount(79)
+                .setSum(PAYMENT.equals(type) ? 78000 : 0));
         conditions.add(new Condition()
                 .setCurrencySymbolicCode("USD")
                 .setYearsOffset(YearsOffset.current_year)
@@ -66,25 +65,30 @@ public class ConditionTemplateUtils {
     }
 
     public static ConditionTemplate createTemplateWithWithdrawalAndPayment() {
-        List<Condition> conditions = new ArrayList<>();
-        conditions.add(new Condition()
-                .setCurrencySymbolicCode("RUB")
-                .setYearsOffset(YearsOffset.current_year)
-                .setCount(2)
-                .setSum(2000));
-        return createTemplate(conditions, null);
+        return new ConditionTemplate()
+                .setPaymentsConditions(new PaymentsConditions()
+                        .setConditions(Collections.singletonList(new Condition()
+                                .setCurrencySymbolicCode("RUB")
+                                .setYearsOffset(YearsOffset.current_year)
+                                .setCount(78)
+                                .setSum(78000))))
+                .setWithdrawalsConditions(new WithdrawalsConditions()
+                        .setConditions(Collections.singletonList(new Condition()
+                                .setCurrencySymbolicCode("RUB")
+                                .setYearsOffset(YearsOffset.current_year)
+                                .setCount(4))));
     }
 
     public static ConditionTemplate createTemplate(List<Condition> conditions,
                                                    String type) {
         ConditionTemplate conditionTemplate = new ConditionTemplate();
-        if (PAYMENT.equals(type) || type == null) {
+        if (PAYMENT.equals(type)) {
             PaymentsConditions paymentsConditions = new PaymentsConditions();
             paymentsConditions.setConditions(conditions);
             conditionTemplate.setPaymentsConditions(paymentsConditions);
         }
 
-        if (WITHDRAWAL.equals(type) || type == null) {
+        if (WITHDRAWAL.equals(type)) {
             WithdrawalsConditions withdrawalsConditions = new WithdrawalsConditions();
             withdrawalsConditions.setConditions(conditions);
             conditionTemplate.setWithdrawalsConditions(withdrawalsConditions);

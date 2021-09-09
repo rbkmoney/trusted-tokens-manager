@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ContainerProperties;
 
 import java.io.File;
 import java.util.HashMap;
@@ -85,6 +86,7 @@ public class KafkaConfig {
         factory.setConsumerFactory(consumerFactory);
         factory.setConcurrency(concurrency);
         factory.setBatchListener(true);
+        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         return factory;
     }
 

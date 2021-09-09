@@ -2,8 +2,8 @@ package com.rbkmoney.trusted.tokens.updater;
 
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
-import com.rbkmoney.trusted.tokens.model.CardToken;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest(classes = TrustedTokensApplication.class)
-class CardTokenDataUpdaterTest {
+class CardTokensPaymentInfoDataUpdaterTest {
 
     private final int currentYear = LocalDateTime.now().getYear();
     private final int currentMonth = LocalDateTime.now().getMonthValue();
@@ -30,19 +30,19 @@ class CardTokenDataUpdaterTest {
     private TransactionToCardTokenConverter transactionToCardTokenConverter;
 
     private CardTokenData cardTokenData;
-    private CardToken paymentCardToken;
-    private CardToken withdrawalCardToken;
+    private CardTokensPaymentInfo paymentCardTokensPaymentInfo;
+    private CardTokensPaymentInfo withdrawalCardTokensPaymentInfo;
 
     @BeforeEach
     public void init() {
         cardTokenData = createCardTokenData();
-        paymentCardToken = createPaymentCardToken();
-        withdrawalCardToken = createWithdrawalCardToken();
+        paymentCardTokensPaymentInfo = createPaymentCardToken();
+        withdrawalCardTokensPaymentInfo = createWithdrawalCardToken();
     }
 
     @Test
     void convertPaymentTest() {
-        cardTokenDataUpdater.updateCurrencyData(paymentCardToken, cardTokenData.getPayments());
+        cardTokenDataUpdater.updateCurrencyData(paymentCardTokensPaymentInfo, cardTokenData.getPayments());
         assertFalse(cardTokenData.getPayments().get("RUB").getYears()
                 .containsKey(currentYear - 3));
         assertEquals(79000, cardTokenData.getPayments().get("RUB").getYears()
@@ -59,7 +59,7 @@ class CardTokenDataUpdaterTest {
 
     @Test
     void convertWithdrawalTest() {
-        cardTokenDataUpdater.updateCurrencyData(withdrawalCardToken, cardTokenData.getWithdrawals());
+        cardTokenDataUpdater.updateCurrencyData(withdrawalCardTokensPaymentInfo, cardTokenData.getWithdrawals());
         assertFalse(cardTokenData.getWithdrawals().get("RUB").getYears()
                 .containsKey(currentYear - 3));
         assertEquals(79, cardTokenData.getWithdrawals().get("RUB").getYears()
@@ -69,11 +69,11 @@ class CardTokenDataUpdaterTest {
                 .getMonths().get(currentMonth).getMonthCount());
     }
 
-    private CardToken createPaymentCardToken() {
+    private CardTokensPaymentInfo createPaymentCardToken() {
         return transactionToCardTokenConverter.convertPaymentToCardToken(createPayment());
     }
 
-    private CardToken createWithdrawalCardToken() {
+    private CardTokensPaymentInfo createWithdrawalCardToken() {
         return transactionToCardTokenConverter.convertWithdrawalToCardToken(createWithdrawal());
     }
 

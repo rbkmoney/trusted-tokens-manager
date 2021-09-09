@@ -61,5 +61,7 @@ kafka:
       concurrency: 1
   ssl:
     enabled: false
+  acknowledgment:
+    nack.sleep: 500
 retry-policy:
   maxAttempts: 10

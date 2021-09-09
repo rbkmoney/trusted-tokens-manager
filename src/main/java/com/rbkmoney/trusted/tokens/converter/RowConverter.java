@@ -13,12 +13,11 @@ public class RowConverter {
 
     private final ObjectMapper objectMapper;
 
-    public Row convert(String key, Object value, String bucket) {
+    public Row convert(String key, Object value) {
         try {
             Row row = new Row();
             row.setKey(key);
             row.setValue(objectMapper.writeValueAsString(value));
-            row.setBucket(bucket);
             return row;
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
