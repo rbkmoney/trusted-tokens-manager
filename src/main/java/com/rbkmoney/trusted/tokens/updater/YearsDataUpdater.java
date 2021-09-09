@@ -5,7 +5,7 @@ import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 
 import java.util.*;
 
-import static com.rbkmoney.trusted.tokens.updater.MothsDataUpdater.updateMonthsData;
+import static com.rbkmoney.trusted.tokens.updater.MonthsDataUpdater.updateMonthsData;
 
 public class YearsDataUpdater {
 
@@ -26,7 +26,8 @@ public class YearsDataUpdater {
         return yearsMap;
     }
 
-    private static long updateYearSum(Map<Integer, CardTokenData.YearsData> yearsMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    private static long updateYearSum(Map<Integer, CardTokenData.YearsData> yearsMap,
+                                      CardTokensPaymentInfo cardTokensPaymentInfo) {
         long amount = cardTokensPaymentInfo.getAmount();
         int year = cardTokensPaymentInfo.getYear();
         return Optional.of(yearsMap)
@@ -36,7 +37,8 @@ public class YearsDataUpdater {
                 .orElse(amount);
     }
 
-    private static int updateYearCount(Map<Integer, CardTokenData.YearsData> yearsMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    private static int updateYearCount(Map<Integer, CardTokenData.YearsData> yearsMap,
+                                       CardTokensPaymentInfo cardTokensPaymentInfo) {
         int year = cardTokensPaymentInfo.getYear();
         return Optional.of(yearsMap)
                 .map(map -> map.get(year))

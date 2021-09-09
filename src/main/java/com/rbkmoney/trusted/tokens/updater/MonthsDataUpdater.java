@@ -5,7 +5,7 @@ import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 
 import java.util.*;
 
-public class MothsDataUpdater {
+public class MonthsDataUpdater {
 
     public static Map<Integer, CardTokenData.MonthsData> updateMonthsData(
             Map<Integer, CardTokenData.YearsData> yearsMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
@@ -22,7 +22,8 @@ public class MothsDataUpdater {
         return monthMap;
     }
 
-    private static long updateMonthSum(Map<Integer, CardTokenData.MonthsData> monthMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    private static long updateMonthSum(Map<Integer, CardTokenData.MonthsData> monthMap,
+                                       CardTokensPaymentInfo cardTokensPaymentInfo) {
         long amount = cardTokensPaymentInfo.getAmount();
         int month = cardTokensPaymentInfo.getMonth();
         return Optional.of(monthMap)
@@ -32,7 +33,8 @@ public class MothsDataUpdater {
                 .orElse(amount);
     }
 
-    private static int updateMonthCount(Map<Integer, CardTokenData.MonthsData> monthMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    private static int updateMonthCount(Map<Integer, CardTokenData.MonthsData> monthMap,
+                                        CardTokensPaymentInfo cardTokensPaymentInfo) {
         int month = cardTokensPaymentInfo.getMonth();
         return Optional.of(monthMap)
                 .map(map -> map.get(month))
