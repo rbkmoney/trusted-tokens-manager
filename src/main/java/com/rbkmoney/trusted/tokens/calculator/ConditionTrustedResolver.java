@@ -11,13 +11,6 @@ import static com.rbkmoney.trusted.tokens.calculator.CurrencyDataTrustedResolver
 public class ConditionTrustedResolver {
 
     public static boolean isTrusted(List<Condition> conditions, Map<String, CardTokenData.CurrencyData> currencies) {
-        boolean conditionTrusted = false;
-        for (Condition condition : conditions) {
-            conditionTrusted = isCurrencyDataTrusted(currencies, condition);
-            if (conditionTrusted) {
-                break;
-            }
-        }
-        return conditionTrusted;
+        return conditions.stream().anyMatch(condition -> isCurrencyDataTrusted(currencies, condition));
     }
 }
