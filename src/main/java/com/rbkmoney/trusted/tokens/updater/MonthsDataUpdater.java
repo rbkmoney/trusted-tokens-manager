@@ -2,12 +2,14 @@ package com.rbkmoney.trusted.tokens.updater;
 
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Component
 public class MonthsDataUpdater {
 
-    public static Map<Integer, CardTokenData.MonthsData> updateMonthsData(
+    public Map<Integer, CardTokenData.MonthsData> updateMonthsData(
             Map<Integer, CardTokenData.YearsData> yearsMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
         int year = cardTokensPaymentInfo.getYear();
         int month = cardTokensPaymentInfo.getMonth();
@@ -22,8 +24,8 @@ public class MonthsDataUpdater {
         return monthMap;
     }
 
-    private static long updateMonthSum(Map<Integer, CardTokenData.MonthsData> monthMap,
-                                       CardTokensPaymentInfo cardTokensPaymentInfo) {
+    private long updateMonthSum(Map<Integer, CardTokenData.MonthsData> monthMap,
+                                CardTokensPaymentInfo cardTokensPaymentInfo) {
         long amount = cardTokensPaymentInfo.getAmount();
         int month = cardTokensPaymentInfo.getMonth();
         return Optional.of(monthMap)
@@ -33,8 +35,8 @@ public class MonthsDataUpdater {
                 .orElse(amount);
     }
 
-    private static int updateMonthCount(Map<Integer, CardTokenData.MonthsData> monthMap,
-                                        CardTokensPaymentInfo cardTokensPaymentInfo) {
+    private int updateMonthCount(Map<Integer, CardTokenData.MonthsData> monthMap,
+                                 CardTokensPaymentInfo cardTokensPaymentInfo) {
         int month = cardTokensPaymentInfo.getMonth();
         return Optional.of(monthMap)
                 .map(map -> map.get(month))

@@ -31,7 +31,7 @@ public class PaymentKafkaListener {
     @KafkaListener(topics = "${kafka.topic.payment.id}",
             containerFactory = "kafkaPaymentListenerContainerFactory")
     public void listen(List<Payment> payments, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
-                       @Header(KafkaHeaders.OFFSET) Long offset, Acknowledgment acknowledgment) {
+                       @Header(KafkaHeaders.OFFSET) Integer offset, Acknowledgment acknowledgment) {
         try {
             log.info(
                     "PaymentEventListener listen result size: {} partition: {} offset: {}",
@@ -48,7 +48,7 @@ public class PaymentKafkaListener {
             acknowledgment.acknowledge();
         } catch (Exception e) {
             log.warn("Error when payments listen e: ", e);
-            acknowledgment.nack(sleep);
+            acknowledgment.nack(offset, sleep);
             throw e;
         }
     }

@@ -31,7 +31,7 @@ public class WithdrawalKafkaListener {
     @KafkaListener(topics = "${kafka.topic.withdrawal.id}",
             containerFactory = "kafkaWithdrawalListenerContainerFactory")
     public void listen(List<Withdrawal> withdrawals, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
-                       @Header(KafkaHeaders.OFFSET) Long offset, Acknowledgment acknowledgment) {
+                       @Header(KafkaHeaders.OFFSET) Integer offset, Acknowledgment acknowledgment) {
         try {
             log.info("Listen withdrawals size: {} partition: {} offset: {}", withdrawals.size(), partition, offset);
             withdrawals.stream()
@@ -42,7 +42,7 @@ public class WithdrawalKafkaListener {
             acknowledgment.acknowledge();
         } catch (Exception e) {
             log.warn("Error when withdrawals listen e: ", e);
-            acknowledgment.nack(sleep);
+            acknowledgment.nack(offset, sleep);
             throw e;
         }
     }

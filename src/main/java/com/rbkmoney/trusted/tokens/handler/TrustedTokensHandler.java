@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.thrift.TException;
 import org.springframework.stereotype.Component;
 
-
 @Component
 @RequiredArgsConstructor
 public class TrustedTokensHandler implements TrustedTokensSrv.Iface {
@@ -18,13 +17,14 @@ public class TrustedTokensHandler implements TrustedTokensSrv.Iface {
     private final TemplateService templateService;
     private final ConditionTemplateValidator conditionTemplateValidator;
     private final CardTokenRepository cardTokenRepository;
+    private final ConditionTrustedResolver conditionTrustedResolver;
 
     @Override
     public boolean isTokenTrusted(String cardToken, ConditionTemplate conditionTemplate)
             throws TException {
         conditionTemplateValidator.validate(conditionTemplate);
         CardTokenData cardTokenData = cardTokenRepository.get(cardToken);
-        return isTrusted(cardTokenData, conditionTemplate);
+        return conditionTrustedResolver.isTrusted(cardTokenData, conditionTemplate);
     }
 
     @Override
@@ -32,7 +32,7 @@ public class TrustedTokensHandler implements TrustedTokensSrv.Iface {
             throws TException {
         ConditionTemplate conditionTemplate = templateService.getConditionTemplate(conditionTemplateName);
         CardTokenData cardTokenData = cardTokenRepository.get(cardToken);
-        return isTrusted(cardTokenData, conditionTemplate);
+        return conditionTrustedResolver.isTrusted(cardTokenData, conditionTemplate);
     }
 
     @Override
@@ -40,23 +40,5 @@ public class TrustedTokensHandler implements TrustedTokensSrv.Iface {
             throws TException {
         conditionTemplateValidator.validate(conditionTemplateRequest.getTemplate());
         templateService.createTemplate(conditionTemplateRequest);
-    }
-
-    private boolean isTrusted(CardTokenData cardTokenData, ConditionTemplate conditionTemplate) {
-        return cardTokenData != null
-                && (isPaymentConditionTrusted(cardTokenData, conditionTemplate)
-                || isWithdrawalConditionTrusted(cardTokenData, conditionTemplate));
-    }
-
-    private boolean isPaymentConditionTrusted(CardTokenData cardTokenData, ConditionTemplate conditionTemplate) {
-        return conditionTemplate.getPaymentsConditions() != null
-                && ConditionTrustedResolver.isTrusted(conditionTemplate.getPaymentsConditions().getConditions(),
-                cardTokenData.getPayments());
-    }
-
-    private boolean isWithdrawalConditionTrusted(CardTokenData cardTokenData, ConditionTemplate conditionTemplate) {
-        return conditionTemplate.getWithdrawalsConditions() != null
-                && ConditionTrustedResolver.isTrusted(conditionTemplate.getWithdrawalsConditions().getConditions(),
-                cardTokenData.getWithdrawals());
     }
 }

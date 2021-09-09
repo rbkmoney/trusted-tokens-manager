@@ -59,28 +59,28 @@ class ListenerTest {
     @Test
     void listenCapturePayment() {
         paymentKafkaListener.listen(Collections.singletonList(
-                createPayment().setStatus(PaymentStatus.captured)), 0, 0L, ack);
+                createPayment().setStatus(PaymentStatus.captured)), 0, 0, ack);
         Mockito.verify(cardTokenRepository, Mockito.times(1)).create(any());
     }
 
     @Test
     void listenProcessedPayment() {
         paymentKafkaListener.listen(Collections.singletonList(
-                createPayment().setStatus(PaymentStatus.processed)), 0, 0L, ack);
+                createPayment().setStatus(PaymentStatus.processed)), 0, 0, ack);
         Mockito.verify(cardTokenRepository, Mockito.times(0)).create(any());
     }
 
     @Test
     void listenSucceededWithdrawal() {
         withdrawalKafkaListener.listen(Collections.singletonList(
-                createWithdrawal().setStatus(WithdrawalStatus.succeeded)), 0, 0L, ack);
+                createWithdrawal().setStatus(WithdrawalStatus.succeeded)), 0, 0, ack);
         Mockito.verify(cardTokenRepository, Mockito.times(1)).create(any());
     }
 
     @Test
     void listenPendingWithdrawal() {
         withdrawalKafkaListener.listen(Collections.singletonList(
-                createWithdrawal().setStatus(WithdrawalStatus.pending)), 0, 0L, ack);
+                createWithdrawal().setStatus(WithdrawalStatus.pending)), 0, 0, ack);
         Mockito.verify(cardTokenRepository, Mockito.times(0)).create(any());
     }
 }
