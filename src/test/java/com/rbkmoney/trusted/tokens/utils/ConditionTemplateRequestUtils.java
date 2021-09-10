@@ -5,9 +5,6 @@ import com.rbkmoney.trusted.tokens.*;
 import java.util.Collections;
 import java.util.List;
 
-import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.PAYMENT;
-import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.WITHDRAWAL;
-
 public class ConditionTemplateRequestUtils {
 
     public static final String CONDITION_NAME = "condition";
