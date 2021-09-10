@@ -2,7 +2,9 @@ package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.Withdrawal;
 import com.rbkmoney.damsel.fraudbusters.WithdrawalStatus;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
+import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
+import com.rbkmoney.trusted.tokens.model.Row;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
 import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ import java.util.List;
 public class WithdrawalKafkaListener {
 
     private final WithdrawalService withdrawalService;
-    private final TransactionToCardTokenConverter transactionToCardTokenConverter;
+    private final TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
     private final CardTokenRepository cardTokenRepository;
 
     @Value("${kafka.acknowledgment.nack.sleep}")
@@ -32,17 +34,21 @@ public class WithdrawalKafkaListener {
             containerFactory = "kafkaWithdrawalListenerContainerFactory")
     public void listen(List<Withdrawal> withdrawals, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                        @Header(KafkaHeaders.OFFSET) Integer offset, Acknowledgment acknowledgment) {
+        int index = 0;
         try {
             log.info("Listen withdrawals size: {} partition: {} offset: {}", withdrawals.size(), partition, offset);
-            withdrawals.stream()
-                    .filter(withdrawal -> WithdrawalStatus.succeeded == withdrawal.getStatus())
-                    .map(transactionToCardTokenConverter::convertWithdrawalToCardToken)
-                    .map(withdrawalService::addWithdrawalCardTokenData)
-                    .forEach(cardTokenRepository::create);
-            acknowledgment.acknowledge();
+            for (Withdrawal withdrawal : withdrawals) {
+                index = withdrawals.indexOf(withdrawal);
+                if (WithdrawalStatus.succeeded == withdrawal.getStatus()) {
+                    CardTokensPaymentInfo cardTokensPaymentInfo =
+                            transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
+                    Row row = withdrawalService.addWithdrawalCardTokenData(cardTokensPaymentInfo);
+                    cardTokenRepository.create(row);
+                }
+            }
         } catch (Exception e) {
             log.warn("Error when withdrawals listen e: ", e);
-            acknowledgment.nack(offset, sleep);
+            acknowledgment.nack(index, sleep);
             throw e;
         }
     }

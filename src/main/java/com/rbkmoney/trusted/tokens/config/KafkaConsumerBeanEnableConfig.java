@@ -1,6 +1,6 @@
 package com.rbkmoney.trusted.tokens.config;
 
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
 import com.rbkmoney.trusted.tokens.listener.PaymentKafkaListener;
 import com.rbkmoney.trusted.tokens.listener.WithdrawalKafkaListener;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
@@ -19,18 +19,24 @@ public class KafkaConsumerBeanEnableConfig {
     @ConditionalOnProperty(value = "kafka.topics.payment.enabled", havingValue = "true")
     public PaymentKafkaListener paymentEventsKafkaListener(
             PaymentService paymentService,
-            TransactionToCardTokenConverter transactionToCardTokenConverter,
+            TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter,
             CardTokenRepository cardTokenRepository) {
-        return new PaymentKafkaListener(paymentService, transactionToCardTokenConverter, cardTokenRepository);
+        return new PaymentKafkaListener(
+                paymentService,
+                transactionToCardTokensPaymentInfoConverter,
+                cardTokenRepository);
     }
 
     @Bean
     @ConditionalOnProperty(value = "kafka.topics.withdrawal.enabled", havingValue = "true")
     public WithdrawalKafkaListener withdrawalKafkaListener(
             WithdrawalService withdrawalService,
-            TransactionToCardTokenConverter transactionToCardTokenConverter,
+            TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter,
             CardTokenRepository cardTokenRepository) {
-        return new WithdrawalKafkaListener(withdrawalService, transactionToCardTokenConverter, cardTokenRepository);
+        return new WithdrawalKafkaListener(
+                withdrawalService,
+                transactionToCardTokensPaymentInfoConverter,
+                cardTokenRepository);
     }
 
 }

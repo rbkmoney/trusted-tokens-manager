@@ -3,6 +3,7 @@ package com.rbkmoney.trusted.tokens.updater;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -12,7 +13,8 @@ import java.util.*;
 public class YearsDataUpdater {
 
     private final MonthsDataUpdater monthsDataUpdater;
-    private static final int KEEP_DATA_YEARS = 3;
+    @Value("${trusted.tokens.keep-card-tokens-data-years}")
+    private int keepDataYears;
 
     public Map<Integer, CardTokenData.YearsData> updateYearsData(
             Map<String, CardTokenData.CurrencyData> currencyMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
@@ -22,7 +24,7 @@ public class YearsDataUpdater {
                 .map(map -> map.get(currency))
                 .map(CardTokenData.CurrencyData::getYears)
                 .orElse(new HashMap<>());
-        yearsMap.keySet().removeIf(key -> key <= year - KEEP_DATA_YEARS);
+        yearsMap.keySet().removeIf(key -> key <= year - keepDataYears);
         yearsMap.put(year, CardTokenData.YearsData.builder()
                 .yearSum(updateYearSum(yearsMap, cardTokensPaymentInfo))
                 .yearCount(updateYearCount(yearsMap, cardTokensPaymentInfo))

@@ -2,7 +2,9 @@ package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.Payment;
 import com.rbkmoney.damsel.fraudbusters.PaymentStatus;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
+import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
+import com.rbkmoney.trusted.tokens.model.Row;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ import java.util.List;
 public class PaymentKafkaListener {
 
     private final PaymentService paymentService;
-    private final TransactionToCardTokenConverter transactionToCardTokenConverter;
+    private final TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
     private final CardTokenRepository cardTokenRepository;
 
     @Value("${kafka.acknowledgment.nack.sleep}")
@@ -32,6 +34,7 @@ public class PaymentKafkaListener {
             containerFactory = "kafkaPaymentListenerContainerFactory")
     public void listen(List<Payment> payments, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
                        @Header(KafkaHeaders.OFFSET) Integer offset, Acknowledgment acknowledgment) {
+        int index = 0;
         try {
             log.info(
                     "PaymentEventListener listen result size: {} partition: {} offset: {}",
@@ -39,16 +42,20 @@ public class PaymentKafkaListener {
                     partition,
                     offset
             );
+            for (Payment payment : payments) {
+                index = payments.indexOf(payment);
+                if (PaymentStatus.captured == payment.getStatus()) {
+                    CardTokensPaymentInfo cardTokensPaymentInfo =
+                            transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(payment);
+                    Row row = paymentService.addPaymentCardTokenData(cardTokensPaymentInfo);
+                    cardTokenRepository.create(row);
+                }
+            }
             log.debug("PaymentEventListener listen result payments: {}", payments);
-            payments.stream()
-                    .filter(payment -> PaymentStatus.captured == payment.getStatus())
-                    .map(transactionToCardTokenConverter::convertPaymentToCardToken)
-                    .map(paymentService::addPaymentCardTokenData)
-                    .forEach(cardTokenRepository::create);
             acknowledgment.acknowledge();
         } catch (Exception e) {
             log.warn("Error when payments listen e: ", e);
-            acknowledgment.nack(offset, sleep);
+            acknowledgment.nack(index, sleep);
             throw e;
         }
     }

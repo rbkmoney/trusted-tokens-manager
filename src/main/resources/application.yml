@@ -65,3 +65,5 @@ kafka:
     nack.sleep: 500
 retry-policy:
   maxAttempts: 10
+trusted.tokens:
+  keep-card-tokens-data-years: 3

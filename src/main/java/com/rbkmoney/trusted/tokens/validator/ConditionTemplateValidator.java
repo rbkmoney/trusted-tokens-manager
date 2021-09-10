@@ -20,10 +20,12 @@ public class ConditionTemplateValidator {
 
         if (!conditionTemplate.isSetPaymentsConditions() && !conditionTemplate.isSetWithdrawalsConditions()) {
             throw new InvalidRequest(INVALID_REQUEST_CONDITIONS);
-        } else if (conditionTemplate.isSetPaymentsConditions()) {
+        }
+        if (conditionTemplate.isSetPaymentsConditions()) {
             paymentsConditionsValidator.validateConditions(
                     conditionTemplate.getPaymentsConditions().getConditions());
-        } else {
+        }
+        if (conditionTemplate.isSetWithdrawalsConditions()) {
             withdrawalConditionsValidator.validateConditions(
                     conditionTemplate.getWithdrawalsConditions().getConditions());
         }

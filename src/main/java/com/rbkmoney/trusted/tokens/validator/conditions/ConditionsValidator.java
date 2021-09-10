@@ -9,25 +9,25 @@ import static com.rbkmoney.trusted.tokens.constants.ExceptionErrors.*;
 
 public abstract class ConditionsValidator {
 
-    protected static void validateRequiredFields(Condition condition) throws InvalidRequest {
+    protected void validateRequiredFields(Condition condition) throws InvalidRequest {
         requireCount(condition.getCount());
         Objects.requireNonNull(condition.getYearsOffset(), YEARS_OFFSET_REQUIRE);
         Objects.requireNonNull(condition.getCurrencySymbolicCode(), CURRENCY_REQUIRE);
     }
 
-    protected static void requireCount(int count) throws InvalidRequest {
+    protected void requireCount(int count) throws InvalidRequest {
         if (count <= 0) {
             throw new InvalidRequest(COUNT_REQUIRE);
         }
     }
 
-    protected static void requireSum(long sum) throws InvalidRequest {
+    protected void requireSum(long sum) throws InvalidRequest {
         if (sum <= 0) {
             throw new InvalidRequest(SUM_REQUIRE);
         }
     }
 
-    protected static void requireNonSumInWithDrawal(long sum) throws InvalidRequest {
+    protected void requireNonSumInWithDrawal(long sum) throws InvalidRequest {
         if (sum > 0) {
             throw new InvalidRequest(INVALID_SUM_IN_WITHDRAWAL);
         }

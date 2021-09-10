@@ -1,7 +1,7 @@
 package com.rbkmoney.trusted.tokens.updater;
 
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ class CardTokensPaymentInfoDataUpdaterTest {
     private CardTokenDataUpdater cardTokenDataUpdater;
 
     @Autowired
-    private TransactionToCardTokenConverter transactionToCardTokenConverter;
+    private TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
 
     private CardTokenData cardTokenData;
     private CardTokensPaymentInfo paymentCardTokensPaymentInfo;
@@ -70,11 +70,11 @@ class CardTokensPaymentInfoDataUpdaterTest {
     }
 
     private CardTokensPaymentInfo createPaymentCardToken() {
-        return transactionToCardTokenConverter.convertPaymentToCardToken(createPayment());
+        return transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(createPayment());
     }
 
     private CardTokensPaymentInfo createWithdrawalCardToken() {
-        return transactionToCardTokenConverter.convertWithdrawalToCardToken(createWithdrawal());
+        return transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(createWithdrawal());
     }
 
 }

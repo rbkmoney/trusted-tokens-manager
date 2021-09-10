@@ -3,7 +3,8 @@ package com.rbkmoney.trusted.tokens.listener;
 import com.rbkmoney.damsel.fraudbusters.PaymentStatus;
 import com.rbkmoney.damsel.fraudbusters.WithdrawalStatus;
 import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokenConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
+import com.rbkmoney.trusted.tokens.exception.RiakExecutionException;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
 import com.rbkmoney.trusted.tokens.service.WithdrawalService;
@@ -15,8 +16,7 @@ import org.springframework.kafka.support.Acknowledgment;
 
 import java.util.Collections;
 
-import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.createPayment;
-import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.createWithdrawal;
+import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.*;
 import static org.mockito.ArgumentMatchers.any;
 
 @SpringBootTest(classes = TrustedTokensApplication.class)
@@ -31,7 +31,7 @@ class ListenerTest {
     @Mock
     WithdrawalService withdrawalService;
     @Autowired
-    TransactionToCardTokenConverter transactionToCardTokenConverter;
+    TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
     PaymentKafkaListener paymentKafkaListener;
     WithdrawalKafkaListener withdrawalKafkaListener;
     AutoCloseable mocks;
@@ -43,12 +43,14 @@ class ListenerTest {
         mocks = MockitoAnnotations.openMocks(this);
         paymentKafkaListener = new PaymentKafkaListener(
                 paymentService,
-                transactionToCardTokenConverter,
+                transactionToCardTokensPaymentInfoConverter,
                 cardTokenRepository);
         withdrawalKafkaListener = new WithdrawalKafkaListener(
                 withdrawalService,
-                transactionToCardTokenConverter,
+                transactionToCardTokensPaymentInfoConverter,
                 cardTokenRepository);
+        Mockito.when(cardTokenRepository.get(EXCEPTION_TOKEN))
+                .thenThrow(RiakExecutionException.class);
     }
 
     @AfterEach
