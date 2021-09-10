@@ -12,7 +12,7 @@ import java.util.*;
 public class YearsDataUpdater {
 
     private final MonthsDataUpdater monthsDataUpdater;
-    private final int keepDataYears = 3;
+    private static final int KEEP_DATA_YEARS = 3;
 
     public Map<Integer, CardTokenData.YearsData> updateYearsData(
             Map<String, CardTokenData.CurrencyData> currencyMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
@@ -22,7 +22,7 @@ public class YearsDataUpdater {
                 .map(map -> map.get(currency))
                 .map(CardTokenData.CurrencyData::getYears)
                 .orElse(new HashMap<>());
-        yearsMap.keySet().removeIf(key -> key <= year - keepDataYears);
+        yearsMap.keySet().removeIf(key -> key <= year - KEEP_DATA_YEARS);
         yearsMap.put(year, CardTokenData.YearsData.builder()
                 .yearSum(updateYearSum(yearsMap, cardTokensPaymentInfo))
                 .yearCount(updateYearCount(yearsMap, cardTokensPaymentInfo))
