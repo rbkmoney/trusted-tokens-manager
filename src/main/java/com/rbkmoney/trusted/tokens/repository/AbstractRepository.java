@@ -29,6 +29,10 @@ public abstract class AbstractRepository {
             return obj != null && obj.getValue() != null
                     ? obj.getValue().toString()
                     : null;
+        } catch (InterruptedException e) {
+            log.error("InterruptedException in Repository when get e: ", e);
+            Thread.currentThread().interrupt();
+            throw new RiakExecutionException(e);
         } catch (Exception e) {
             log.error("Exception in Repository when get e: ", e);
             throw new RiakExecutionException(e);
