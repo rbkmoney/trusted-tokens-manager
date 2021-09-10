@@ -12,48 +12,6 @@ public class ConditionTemplateRequestUtils {
 
     public static final String CONDITION_NAME = "condition";
 
-    public static ConditionTemplateRequest createTemplateRequestWithTwoConditions() {
-        return new ConditionTemplateRequest()
-                .setName(CONDITION_NAME)
-                .setTemplate(new ConditionTemplate()
-                        .setPaymentsConditions(new PaymentsConditions()
-                                .setConditions(createConditions(PAYMENT)))
-                        .setWithdrawalsConditions(new WithdrawalsConditions()
-                                .setConditions(createConditions(WITHDRAWAL))));
-    }
-
-    public static ConditionTemplateRequest createTrueTemplateRequest() {
-        return new ConditionTemplateRequest()
-                .setName(CONDITION_NAME)
-                .setTemplate(new ConditionTemplate()
-                        .setPaymentsConditions(new PaymentsConditions()
-                                .setConditions(createConditions(PAYMENT))));
-    }
-
-    public static List<Condition> createConditions(String type) {
-        return Collections.singletonList(new Condition()
-                .setCurrencySymbolicCode("RUB")
-                .setYearsOffset(YearsOffset.current_with_two_last_years)
-                .setCount(2)
-                .setSum(PAYMENT.equals(type) ? 2000 : 0));
-    }
-
-    public static ConditionTemplateRequest createFalseTemplateRequest() {
-        return new ConditionTemplateRequest()
-                .setName(CONDITION_NAME)
-                .setTemplate(new ConditionTemplate()
-                        .setPaymentsConditions(new PaymentsConditions()
-                                .setConditions(createFalseConditions(PAYMENT))));
-    }
-
-    public static List<Condition> createFalseConditions(String type) {
-        return Collections.singletonList(new Condition()
-                .setCurrencySymbolicCode("RUB")
-                .setYearsOffset(YearsOffset.current_with_two_last_years)
-                .setCount(80)
-                .setSum(PAYMENT.equals(type) ? 80000 : 0));
-    }
-
     public static ConditionTemplateRequest createTemplatePaymentRequestWithNullYearsOffset() {
         return new ConditionTemplateRequest()
                 .setName(CONDITION_NAME)

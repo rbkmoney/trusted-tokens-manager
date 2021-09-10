@@ -1,16 +1,11 @@
 package com.rbkmoney.trusted.tokens.utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rbkmoney.damsel.domain.*;
 import com.rbkmoney.damsel.fraudbusters.*;
-import com.rbkmoney.trusted.tokens.converter.RowConverter;
-import com.rbkmoney.trusted.tokens.model.Row;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 
 public class TransactionUtils {
 
@@ -61,7 +56,4 @@ public class TransactionUtils {
         return payment;
     }
 
-    public static Row createRow() {
-        return new RowConverter(new ObjectMapper()).convert(EXCEPTION_TOKEN, createCardTokenData());
-    }
 }
