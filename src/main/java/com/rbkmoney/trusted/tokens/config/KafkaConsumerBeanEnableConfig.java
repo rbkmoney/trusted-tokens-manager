@@ -16,7 +16,7 @@ import org.springframework.kafka.annotation.EnableKafka;
 public class KafkaConsumerBeanEnableConfig {
 
     @Bean
-    @ConditionalOnProperty(value = "kafka.topics.payment.enabled", havingValue = "true")
+    @ConditionalOnProperty(value = "kafka.topic.payment.enabled", havingValue = "true")
     public PaymentKafkaListener paymentEventsKafkaListener(
             PaymentService paymentService,
             TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter,
@@ -28,7 +28,7 @@ public class KafkaConsumerBeanEnableConfig {
     }
 
     @Bean
-    @ConditionalOnProperty(value = "kafka.topics.withdrawal.enabled", havingValue = "true")
+    @ConditionalOnProperty(value = "kafka.topic.withdrawal.enabled", havingValue = "true")
     public WithdrawalKafkaListener withdrawalKafkaListener(
             WithdrawalService withdrawalService,
             TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter,
