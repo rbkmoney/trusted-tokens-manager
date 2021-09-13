@@ -34,3 +34,36 @@ spring:
 info:
   version: '@project.version@'
   stage: dev
+
+riak:
+  address: localhost
+  port: 8087
+  bucket:
+    token: token
+    template: template
+
+kafka:
+  bootstrap.servers: "localhost:29092"
+  client.id: trusted-tokens
+  consumer:
+    group-id: trusted-tokens-group-1
+    enable-auto-commit: false
+    auto-offset-reset: earliest
+    max-poll-records: 20
+  topic:
+    payment:
+      id: payment_event
+      enabled: false
+      concurrency: 1
+    withdrawal:
+      id: withdrawal
+      enabled: false
+      concurrency: 1
+  ssl:
+    enabled: false
+  acknowledgment:
+    nack.sleep: 500
+retry-policy:
+  maxAttempts: 10
+trusted.tokens:
+  keep-card-tokens-data-years: 3
