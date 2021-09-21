@@ -46,7 +46,7 @@ kafka:
   bootstrap-servers: kenny-kafka1.bst1.rbkmoney.net:9092
   client-id: trusted-tokens-manager
   consumer:
-    group-id: trusted-tokens-manager-group-1
+    group-id: trusted-tokens-group-1
     max-poll-interval-ms: 60000
     max-session-timeout-ms: 60000
     throttling-timeout-ms: 1000

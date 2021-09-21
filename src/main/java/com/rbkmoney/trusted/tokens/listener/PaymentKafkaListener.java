@@ -36,32 +36,30 @@ public class PaymentKafkaListener {
             containerFactory = "paymentListenerContainerFactory")
     public void listen(
             List<ConsumerRecord<String, Payment>> batch,
-            Acknowledgment ack) throws InterruptedException {
-        log.info("PaymentKafkaListener listen offsets, size={}, {}",
-                batch.size(), toSummaryPaymentString(batch));
-        List<Payment> payments = batch.stream()
-                .map(ConsumerRecord::value)
-                .collect(Collectors.toList());
+            Acknowledgment ack) {
+        int index = 0;
         try {
-            handleMessages(payments);
-        } catch (Exception e) {
-            log.error("Error when PaymentKafkaListener listen e: ", e);
-            Thread.sleep(throttlingTimeout);
-            throw e;
-        }
-        ack.acknowledge();
-        log.info("PaymentKafkaListener Records have been committed, size={}, {}",
-                batch.size(), toSummaryPaymentString(batch));
-    }
-
-    private void handleMessages(List<Payment> payments) {
-        for (Payment payment : payments) {
-            if (PaymentStatus.captured == payment.getStatus()
-                    && payment.getPaymentTool().isSetBankCard()) {
-                var info = transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(payment);
-                Row row = paymentService.addPaymentCardTokenData(info);
-                cardTokenRepository.create(row);
+            log.info("PaymentKafkaListener listen offsets, size={}, {}",
+                    batch.size(), toSummaryPaymentString(batch));
+            List<Payment> payments = batch.stream()
+                    .map(ConsumerRecord::value)
+                    .collect(Collectors.toList());
+            for (Payment payment : payments) {
+                index = payments.indexOf(payment);
+                if (PaymentStatus.captured == payment.getStatus()
+                        && payment.getPaymentTool().isSetBankCard()) {
+                    var info = transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(payment);
+                    Row row = paymentService.addPaymentCardTokenData(info);
+                    cardTokenRepository.create(row);
+                }
             }
+            ack.acknowledge();
+            log.info("PaymentKafkaListener Records have been committed, size={}, {}",
+                    batch.size(), toSummaryPaymentString(batch));
+        } catch (Exception ex) {
+            log.error("Error when PaymentKafkaListener listen ex,", ex);
+            ack.nack(index, throttlingTimeout);
+            throw ex;
         }
     }
 

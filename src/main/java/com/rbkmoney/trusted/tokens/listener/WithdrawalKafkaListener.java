@@ -36,32 +36,30 @@ public class WithdrawalKafkaListener {
             containerFactory = "withdrawalListenerContainerFactory")
     public void listen(
             List<ConsumerRecord<String, Withdrawal>> batch,
-            Acknowledgment ack) throws InterruptedException {
-        log.info("WithdrawalKafkaListener listen offsets, size={}, {}",
-                batch.size(), toSummaryWithdrawalString(batch));
-        List<Withdrawal> withdrawals = batch.stream()
-                .map(ConsumerRecord::value)
-                .collect(Collectors.toList());
+            Acknowledgment ack) {
+        int index = 0;
         try {
-            handleMessages(withdrawals);
-        } catch (Exception e) {
-            log.error("Error when WithdrawalKafkaListener listen e: ", e);
-            Thread.sleep(throttlingTimeout);
-            throw e;
-        }
-        ack.acknowledge();
-        log.info("WithdrawalKafkaListener Records have been committed, size={}, {}",
-                batch.size(), toSummaryWithdrawalString(batch));
-    }
-
-    private void handleMessages(List<Withdrawal> withdrawals) {
-        for (Withdrawal withdrawal : withdrawals) {
-            if (WithdrawalStatus.succeeded == withdrawal.getStatus()
-                    && withdrawal.getDestinationResource().isSetBankCard()) {
-                var info = transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
-                Row row = withdrawalService.addWithdrawalCardTokenData(info);
-                cardTokenRepository.create(row);
+            log.info("WithdrawalKafkaListener listen offsets, size={}, {}",
+                    batch.size(), toSummaryWithdrawalString(batch));
+            List<Withdrawal> withdrawals = batch.stream()
+                    .map(ConsumerRecord::value)
+                    .collect(Collectors.toList());
+            for (Withdrawal withdrawal : withdrawals) {
+                index = withdrawals.indexOf(withdrawal);
+                if (WithdrawalStatus.succeeded == withdrawal.getStatus()
+                        && withdrawal.getDestinationResource().isSetBankCard()) {
+                    var info = transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
+                    Row row = withdrawalService.addWithdrawalCardTokenData(info);
+                    cardTokenRepository.create(row);
+                }
             }
+            ack.acknowledge();
+            log.info("WithdrawalKafkaListener Records have been committed, size={}, {}",
+                    batch.size(), toSummaryWithdrawalString(batch));
+        } catch (Exception ex) {
+            log.error("Error when WithdrawalKafkaListener listen ex,", ex);
+            ack.nack(index, throttlingTimeout);
+            throw ex;
         }
     }
 
