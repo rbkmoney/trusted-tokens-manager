@@ -1,49 +1,53 @@
 package com.rbkmoney.trusted.tokens.handler;
 
-import com.rbkmoney.trusted.tokens.*;
+import com.rbkmoney.trusted.tokens.ConditionTemplateNotFound;
+import com.rbkmoney.trusted.tokens.InvalidRequest;
+import com.rbkmoney.trusted.tokens.config.MockedStartupInitializers;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
 import com.rbkmoney.trusted.tokens.repository.ConditionTemplateRepository;
 import org.apache.thrift.TException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateRequestUtils.*;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.*;
 import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.TOKEN;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = TrustedTokensApplication.class)
-class HandlerTest {
+@SpringBootTest
+@Import(MockedStartupInitializers.class)
+public class HandlerTest {
 
     @MockBean
-    ConditionTemplateRepository conditionTemplateRepository;
+    private ConditionTemplateRepository conditionTemplateRepository;
 
     @MockBean
-    CardTokenRepository cardTokenRepository;
+    private CardTokenRepository cardTokenRepository;
 
     @Autowired
-    TrustedTokensHandler trustedTokensHandler;
+    private TrustedTokensHandler trustedTokensHandler;
 
     @BeforeEach
     public void init() {
-        Mockito.when(cardTokenRepository.get(TOKEN))
+        when(cardTokenRepository.get(TOKEN))
                 .thenReturn(createCardTokenData());
-        Mockito.when(conditionTemplateRepository.get("TemplateNotTrustedPayment"))
+        when(conditionTemplateRepository.get("TemplateNotTrustedPayment"))
                 .thenReturn(createTemplateNotTrusted(PAYMENT));
-        Mockito.when(conditionTemplateRepository.get("TemplateTrustedPayment"))
+        when(conditionTemplateRepository.get("TemplateTrustedPayment"))
                 .thenReturn(createTemplateTrusted(PAYMENT));
-        Mockito.when(conditionTemplateRepository.get("TemplateTrustedWithSeveralCurrencyPayment"))
+        when(conditionTemplateRepository.get("TemplateTrustedWithSeveralCurrencyPayment"))
                 .thenReturn(createTemplateTrustedWithSeveralCurrency(PAYMENT));
-        Mockito.when(conditionTemplateRepository.get("TemplateNotTrustedWithdrawal"))
+        when(conditionTemplateRepository.get("TemplateNotTrustedWithdrawal"))
                 .thenReturn(createTemplateNotTrusted(WITHDRAWAL));
-        Mockito.when(conditionTemplateRepository.get("TemplateTrustedWithdrawal"))
+        when(conditionTemplateRepository.get("TemplateTrustedWithdrawal"))
                 .thenReturn(createTemplateTrusted(WITHDRAWAL));
-        Mockito.when(conditionTemplateRepository.get("TemplateTrustedWithSeveralCurrencyWithdrawal"))
+        when(conditionTemplateRepository.get("TemplateTrustedWithSeveralCurrencyWithdrawal"))
                 .thenReturn(createTemplateTrustedWithSeveralCurrency(WITHDRAWAL));
     }
 

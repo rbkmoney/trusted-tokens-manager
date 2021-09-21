@@ -1,6 +1,6 @@
 package com.rbkmoney.trusted.tokens.updater;
 
-import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
+import com.rbkmoney.trusted.tokens.config.MockedStartupInitializers;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,8 @@ import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.createWithdrawa
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-@SpringBootTest(classes = TrustedTokensApplication.class)
+@SpringBootTest
+@Import(MockedStartupInitializers.class)
 class CardTokensPaymentInfoDataUpdaterTest {
 
     private final int currentYear = LocalDateTime.now().getYear();
