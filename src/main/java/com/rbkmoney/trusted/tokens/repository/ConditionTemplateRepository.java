@@ -36,7 +36,7 @@ public class ConditionTemplateRepository extends AbstractRepository {
     }
 
     public void create(Row row) {
-        log.debug("ConditionTemplateRepository create in row: {}", row);
+        log.info("ConditionTemplateRepository create in row: {}", row);
         create(row, bucket);
     }
 }

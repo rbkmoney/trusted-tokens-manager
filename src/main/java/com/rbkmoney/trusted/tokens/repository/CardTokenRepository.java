@@ -38,7 +38,7 @@ public class CardTokenRepository extends AbstractRepository {
 
     public void create(Row row) {
         try {
-            log.debug("CardTokenRepository create in row: {}", row);
+            log.info("CardTokenRepository create in row: {}", row);
             create(row, bucket);
         } catch (Exception e) {
             log.error("Exception in CardTokenRepository when create e: ", e);
