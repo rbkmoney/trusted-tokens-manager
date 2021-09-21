@@ -2,99 +2,62 @@ package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.PaymentStatus;
 import com.rbkmoney.damsel.fraudbusters.WithdrawalStatus;
-import com.rbkmoney.trusted.tokens.TrustedTokensApplication;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
+import com.rbkmoney.testcontainers.annotations.KafkaSpringBootTest;
+import com.rbkmoney.testcontainers.annotations.kafka.KafkaTestcontainer;
+import com.rbkmoney.testcontainers.annotations.kafka.config.KafkaProducer;
+import com.rbkmoney.trusted.tokens.config.MockedStartupInitializers;
 import com.rbkmoney.trusted.tokens.exception.RiakExecutionException;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
-import com.rbkmoney.trusted.tokens.service.PaymentService;
-import com.rbkmoney.trusted.tokens.service.WithdrawalService;
-import org.junit.jupiter.api.*;
-import org.mockito.*;
+import org.apache.thrift.TBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.kafka.support.Acknowledgment;
-
-import java.util.Collections;
+import org.springframework.context.annotation.Import;
 
 import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest(classes = TrustedTokensApplication.class)
-class ListenerTest {
+@KafkaTestcontainer(
+        properties = {
+                "kafka.topics.payment.consume.enabled=true",
+                "kafka.topics.withdrawal.consume.enabled=true",
+                "kafka.state.cache.size=0"},
+        topicsKeys = {
+                "kafka.topics.payment.id",
+                "kafka.topics.withdrawal.id"})
+@KafkaSpringBootTest
+@Import(MockedStartupInitializers.class)
+public class ListenerTest {
 
+    @Value("${kafka.topics.payment.id}")
+    private String paymentTopicName;
+    @Value("${kafka.topics.withdrawal.id}")
+    private String withdrawalTopicName;
+    @Autowired
+    private KafkaProducer<TBase<?, ?>> testThriftKafkaProducer;
     @MockBean
-    CardTokenRepository cardTokenRepository;
-
-    @Autowired
-    PaymentService paymentService;
-
-    @Autowired
-    WithdrawalService withdrawalService;
-
-    @Autowired
-    TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
-
-    @Autowired
-    PaymentKafkaListener paymentKafkaListener;
-
-    @Autowired
-    WithdrawalKafkaListener withdrawalKafkaListener;
-
-    AutoCloseable mocks;
-
-    @Mock
-    private Acknowledgment ack;
+    private CardTokenRepository cardTokenRepository;
 
     @BeforeEach
     public void init() {
-        mocks = MockitoAnnotations.openMocks(this);
-        Mockito.when(cardTokenRepository.get(EXCEPTION_TOKEN))
-                .thenThrow(RiakExecutionException.class);
-    }
-
-    @AfterEach
-    public void clean() throws Exception {
         doThrow(new RiakExecutionException()).when(cardTokenRepository)
                 .get(EXCEPTION_TOKEN);
-        mocks.close();
     }
 
     @Test
-    void listenCapturePayment() {
-        paymentKafkaListener.listen(Collections.singletonList(
-                createPayment().setStatus(PaymentStatus.captured)), 0, 0, ack);
-        Mockito.verify(cardTokenRepository, Mockito.times(1)).create(any());
-    }
-
-    @Test
-    void listenProcessedPayment() {
-        paymentKafkaListener.listen(Collections.singletonList(
-                createPayment().setStatus(PaymentStatus.processed)), 0, 0, ack);
-        Mockito.verify(cardTokenRepository, Mockito.times(0)).create(any());
+    public void listenCapturePayment() {
+        testThriftKafkaProducer.send(paymentTopicName, createPayment().setStatus(PaymentStatus.captured));
+        testThriftKafkaProducer.send(paymentTopicName, createPayment().setStatus(PaymentStatus.processed));
+        verify(cardTokenRepository, timeout(5000).times(1)).create(any());
     }
 
     @Test
     void listenSucceededWithdrawal() {
-        withdrawalKafkaListener.listen(Collections.singletonList(
-                createWithdrawal().setStatus(WithdrawalStatus.succeeded)), 0, 0, ack);
-        Mockito.verify(cardTokenRepository, Mockito.times(1)).create(any());
-    }
-
-    @Test
-    void listenPendingWithdrawal() {
-        withdrawalKafkaListener.listen(Collections.singletonList(
-                createWithdrawal().setStatus(WithdrawalStatus.pending)), 0, 0, ack);
-        Mockito.verify(cardTokenRepository, Mockito.times(0)).create(any());
-    }
-
-    @Test
-    void listenPaymentsWithException() {
-        assertThrows(RiakExecutionException.class,
-                () -> paymentKafkaListener.listen(createPaymentList(), 0, 0, ack));
-        Mockito.verify(ack, Mockito.times(0)).acknowledge();
-        Mockito.verify(ack, Mockito.times(1)).nack(1, 500);
+        testThriftKafkaProducer.send(withdrawalTopicName, createWithdrawal().setStatus(WithdrawalStatus.succeeded));
+        testThriftKafkaProducer.send(withdrawalTopicName, createWithdrawal().setStatus(WithdrawalStatus.pending));
+        verify(cardTokenRepository, timeout(5000).times(1)).create(any());
     }
 }

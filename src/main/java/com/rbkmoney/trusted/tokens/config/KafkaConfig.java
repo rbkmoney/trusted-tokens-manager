@@ -18,92 +18,125 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.SeekToCurrentBatchErrorHandler;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.kafka.clients.consumer.OffsetResetStrategy.EARLIEST;
+
 @Configuration
 @EnableConfigurationProperties(KafkaSslProperties.class)
 public class KafkaConfig {
 
-    @Value("${retry-policy.maxAttempts}")
-    int maxAttempts;
-    @Value("${kafka.consumer.auto-offset-reset}")
-    private String autoOffsetReset;
-    @Value("${kafka.consumer.enable-auto-commit}")
-    private boolean enableAutoCommit;
+    @Value("${kafka.bootstrap-servers}")
+    private String bootstrapServers;
+
+    @Value("${kafka.client-id}")
+    private String clientId;
+
     @Value("${kafka.consumer.group-id}")
     private String groupId;
-    @Value("${kafka.client.id}")
-    private String clientId;
-    @Value("${kafka.consumer.max-poll-records}")
-    private int maxPollRecords;
-    @Value("${kafka.bootstrap.servers}")
-    private String bootstrapServers;
-    @Value("${kafka.topic.payment.concurrency}")
+
+    @Value("${kafka.consumer.max-poll-interval-ms}")
+    private int maxPollInterval;
+
+    @Value("${kafka.consumer.max-session-timeout-ms}")
+    private int maxSessionTimeout;
+
+    @Value("${kafka.topics.payment.consume.max-poll-records}")
+    private String paymentMaxPollRecords;
+
+    @Value("${kafka.topics.payment.consume.concurrency}")
     private int paymentConcurrency;
-    @Value("${kafka.topic.withdrawal.concurrency}")
+
+    @Value("${kafka.topics.withdrawal.consume.max-poll-records}")
+    private String withdrawalMaxPollRecords;
+
+    @Value("${kafka.topics.withdrawal.consume.concurrency}")
     private int withdrawalConcurrency;
 
-    public Map<String, Object> createDefaultProperties(KafkaSslProperties kafkaSslProperties) {
-        final Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, enableAutoCommit);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, autoOffsetReset);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
-        configureSsl(props, kafkaSslProperties);
-        return props;
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Payment> paymentListenerContainerFactory(
+            KafkaSslProperties kafkaSslProperties) {
+        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, Payment>();
+        configureContainerFactory(
+                containerFactory,
+                new PaymentDeserializer(),
+                clientId + "-payment",
+                paymentMaxPollRecords,
+                kafkaSslProperties);
+        containerFactory.setConcurrency(paymentConcurrency);
+        return containerFactory;
     }
 
-    private void configureSsl(Map<String, Object> props, KafkaSslProperties kafkaSslProperties) {
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, Withdrawal> withdrawalListenerContainerFactory(
+            KafkaSslProperties kafkaSslProperties) {
+        var containerFactory = new ConcurrentKafkaListenerContainerFactory<String, Withdrawal>();
+        configureContainerFactory(
+                containerFactory,
+                new WithdrawalDeserializer(),
+                clientId + "-withdrawal",
+                withdrawalMaxPollRecords,
+                kafkaSslProperties);
+        containerFactory.setConcurrency(withdrawalConcurrency);
+        return containerFactory;
+    }
+
+    private <T> void configureContainerFactory(
+            ConcurrentKafkaListenerContainerFactory<String, T> containerFactory,
+            Deserializer<T> deserializer,
+            String clientId,
+            String maxPollRecords,
+            KafkaSslProperties kafkaSslProperties) {
+        var consumerFactory = createKafkaConsumerFactory(
+                deserializer,
+                clientId,
+                maxPollRecords,
+                kafkaSslProperties);
+        containerFactory.setConsumerFactory(consumerFactory);
+        containerFactory.setBatchErrorHandler(new SeekToCurrentBatchErrorHandler());
+        containerFactory.setBatchListener(true);
+        containerFactory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+    }
+
+    private <T> DefaultKafkaConsumerFactory<String, T> createKafkaConsumerFactory(
+            Deserializer<T> deserializer,
+            String clientId,
+            String maxPollRecords,
+            KafkaSslProperties kafkaSslProperties) {
+        Map<String, Object> properties = defaultProperties(kafkaSslProperties);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        properties.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId);
+        properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
+        return new DefaultKafkaConsumerFactory<>(properties, new StringDeserializer(), deserializer);
+    }
+
+    private Map<String, Object> defaultProperties(KafkaSslProperties kafkaSslProperties) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST.name().toLowerCase());
+        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        properties.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval);
+        properties.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, maxSessionTimeout);
+        configureSsl(properties, kafkaSslProperties);
+        return properties;
+    }
+
+    private void configureSsl(Map<String, Object> properties, KafkaSslProperties kafkaSslProperties) {
         if (kafkaSslProperties.isEnabled()) {
-            props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name());
-            props.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
+            properties.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, SecurityProtocol.SSL.name());
+            properties.put(SslConfigs.SSL_TRUSTSTORE_LOCATION_CONFIG,
                     new File(kafkaSslProperties.getTrustStoreLocation()).getAbsolutePath());
-            props.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, kafkaSslProperties.getTrustStorePassword());
-            props.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, kafkaSslProperties.getKeyStoreType());
-            props.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, kafkaSslProperties.getTrustStoreType());
-            props.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
+            properties.put(SslConfigs.SSL_TRUSTSTORE_PASSWORD_CONFIG, kafkaSslProperties.getTrustStorePassword());
+            properties.put(SslConfigs.SSL_KEYSTORE_TYPE_CONFIG, kafkaSslProperties.getKeyStoreType());
+            properties.put(SslConfigs.SSL_TRUSTSTORE_TYPE_CONFIG, kafkaSslProperties.getTrustStoreType());
+            properties.put(SslConfigs.SSL_KEYSTORE_LOCATION_CONFIG,
                     new File(kafkaSslProperties.getKeyStoreLocation()).getAbsolutePath());
-            props.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, kafkaSslProperties.getKeyStorePassword());
-            props.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, kafkaSslProperties.getKeyPassword());
+            properties.put(SslConfigs.SSL_KEYSTORE_PASSWORD_CONFIG, kafkaSslProperties.getKeyStorePassword());
+            properties.put(SslConfigs.SSL_KEY_PASSWORD_CONFIG, kafkaSslProperties.getKeyPassword());
         }
     }
-
-    public <T> ConcurrentKafkaListenerContainerFactory<String, T> createFactory(
-            Deserializer<T> deserializer,
-            Map<String, Object> props,
-            int concurrency) {
-        ConcurrentKafkaListenerContainerFactory<String, T> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
-        DefaultKafkaConsumerFactory<String, T> consumerFactory = new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                deserializer
-        );
-        factory.setConsumerFactory(consumerFactory);
-        factory.setConcurrency(concurrency);
-        factory.setBatchListener(true);
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
-        return factory;
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Payment> kafkaPaymentListenerContainerFactory(
-            KafkaSslProperties kafkaSslProperties) {
-        Map<String, Object> prop = createDefaultProperties(kafkaSslProperties);
-        prop.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + "-payment");
-        return createFactory(new PaymentDeserializer(), prop, paymentConcurrency);
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, Withdrawal> kafkaWithdrawalListenerContainerFactory(
-            KafkaSslProperties kafkaSslProperties) {
-        Map<String, Object> prop = createDefaultProperties(kafkaSslProperties);
-        prop.put(ConsumerConfig.CLIENT_ID_CONFIG, clientId + "-withdrawal");
-        return createFactory(new WithdrawalDeserializer(), prop, withdrawalConcurrency);
-    }
-
 }

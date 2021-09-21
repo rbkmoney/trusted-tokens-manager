@@ -2,21 +2,21 @@ package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.Withdrawal;
 import com.rbkmoney.damsel.fraudbusters.WithdrawalStatus;
+import com.rbkmoney.kafka.common.util.LogUtil;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
-import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import com.rbkmoney.trusted.tokens.model.Row;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
 import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -27,30 +27,48 @@ public class WithdrawalKafkaListener {
     private final TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
     private final CardTokenRepository cardTokenRepository;
 
-    @Value("${kafka.acknowledgment.nack.sleep}")
-    private long sleep;
+    @Value("${kafka.consumer.throttling-timeout-ms}")
+    private int throttlingTimeout;
 
-    @KafkaListener(topics = "${kafka.topic.withdrawal.id}",
-            containerFactory = "kafkaWithdrawalListenerContainerFactory")
-    public void listen(List<Withdrawal> withdrawals, @Header(KafkaHeaders.RECEIVED_PARTITION_ID) Integer partition,
-                       @Header(KafkaHeaders.OFFSET) Integer offset, Acknowledgment acknowledgment) {
-        int index = 0;
+    @KafkaListener(
+            autoStartup = "${kafka.topics.withdrawal.consume.enabled}",
+            topics = "${kafka.topics.withdrawal.id}",
+            containerFactory = "withdrawalListenerContainerFactory")
+    public void listen(
+            List<ConsumerRecord<String, Withdrawal>> batch,
+            Acknowledgment ack) throws InterruptedException {
+        log.info("WithdrawalKafkaListener listen offsets, size={}, {}",
+                batch.size(), toSummaryWithdrawalString(batch));
+        List<Withdrawal> withdrawals = batch.stream()
+                .map(ConsumerRecord::value)
+                .collect(Collectors.toList());
         try {
-            log.info("Listen withdrawals size: {} partition: {} offset: {}", withdrawals.size(), partition, offset);
-            for (Withdrawal withdrawal : withdrawals) {
-                index = withdrawals.indexOf(withdrawal);
-                if (WithdrawalStatus.succeeded == withdrawal.getStatus()) {
-                    CardTokensPaymentInfo cardTokensPaymentInfo =
-                            transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
-                    Row row = withdrawalService.addWithdrawalCardTokenData(cardTokensPaymentInfo);
-                    cardTokenRepository.create(row);
-                }
-            }
+            handleMessages(withdrawals);
         } catch (Exception e) {
-            log.warn("Error when withdrawals listen e: ", e);
-            acknowledgment.nack(index, sleep);
+            log.error("Error when WithdrawalKafkaListener listen e: ", e);
+            Thread.sleep(throttlingTimeout);
             throw e;
+        }
+        ack.acknowledge();
+        log.info("WithdrawalKafkaListener Records have been committed, size={}, {}",
+                batch.size(), toSummaryWithdrawalString(batch));
+    }
+
+    private void handleMessages(List<Withdrawal> withdrawals) {
+        for (Withdrawal withdrawal : withdrawals) {
+            if (WithdrawalStatus.succeeded == withdrawal.getStatus()
+                    && withdrawal.getDestinationResource().isSetBankCard()) {
+                var info = transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
+                Row row = withdrawalService.addWithdrawalCardTokenData(info);
+                cardTokenRepository.create(row);
+            }
         }
     }
 
+    public static <K> String toSummaryWithdrawalString(List<ConsumerRecord<K, Withdrawal>> records) {
+        String valueKeysString = records.stream().map(ConsumerRecord::value)
+                .map((value) -> String.format("'%s'", value.getId()))
+                .collect(Collectors.joining(", "));
+        return String.format("%s, values={%s}", LogUtil.toSummaryString(records), valueKeysString);
+    }
 }
