@@ -6,12 +6,13 @@ import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Component
 public class TransactionToCardTokensPaymentInfoConverter {
 
     public CardTokensPaymentInfo convertPaymentToCardToken(Payment payment) {
-        LocalDateTime localDateTime = LocalDateTime.parse(payment.getEventTime());
+        LocalDateTime localDateTime = LocalDateTime.parse(payment.getEventTime(), DateTimeFormatter.ISO_DATE_TIME);
         return CardTokensPaymentInfo.builder()
                 .token(payment.getPaymentTool().getBankCard().getToken())
                 .currency(payment.getCost().getCurrency().getSymbolicCode())
@@ -22,7 +23,7 @@ public class TransactionToCardTokensPaymentInfoConverter {
     }
 
     public CardTokensPaymentInfo convertWithdrawalToCardToken(Withdrawal withdrawal) {
-        LocalDateTime localDateTime = LocalDateTime.parse(withdrawal.getEventTime());
+        LocalDateTime localDateTime = LocalDateTime.parse(withdrawal.getEventTime(), DateTimeFormatter.ISO_DATE_TIME);
         return CardTokensPaymentInfo.builder()
                 .token(withdrawal.getDestinationResource().getBankCard().getToken())
                 .currency(withdrawal.getCost().getCurrency().getSymbolicCode())
