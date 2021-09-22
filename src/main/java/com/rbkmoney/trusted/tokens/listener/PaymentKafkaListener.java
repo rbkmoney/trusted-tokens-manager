@@ -48,6 +48,10 @@ public class PaymentKafkaListener {
                 index = payments.indexOf(payment);
                 if (PaymentStatus.captured == payment.getStatus()
                         && payment.getPaymentTool().isSetBankCard()) {
+                    log.info("Start create row with paymentID {} status {} token {}",
+                            payment.getId(),
+                            payment.getStatus(),
+                            payment.getPaymentTool().getBankCard().getToken());
                     var info = transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(payment);
                     Row row = paymentService.addPaymentCardTokenData(info);
                     cardTokenRepository.create(row);
@@ -65,7 +69,7 @@ public class PaymentKafkaListener {
 
     public static <K> String toSummaryPaymentString(List<ConsumerRecord<K, Payment>> records) {
         String valueKeysString = records.stream().map(ConsumerRecord::value)
-                .map((value) -> String.format("'%s'", value.getId()))
+                .map((value) -> String.format("'%s' - '%s'", value.getId(), value.getStatus()))
                 .collect(Collectors.joining(", "));
         return String.format("%s, values={%s}", LogUtil.toSummaryString(records), valueKeysString);
     }
