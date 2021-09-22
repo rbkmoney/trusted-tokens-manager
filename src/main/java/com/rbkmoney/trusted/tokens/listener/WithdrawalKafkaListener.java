@@ -48,6 +48,10 @@ public class WithdrawalKafkaListener {
                 index = withdrawals.indexOf(withdrawal);
                 if (WithdrawalStatus.succeeded == withdrawal.getStatus()
                         && withdrawal.getDestinationResource().isSetBankCard()) {
+                    log.info("Start create row with withdrawalID {} status {} token {}",
+                            withdrawal.getId(),
+                            withdrawal.getStatus(),
+                            withdrawal.getDestinationResource().getBankCard().getToken());
                     var info = transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
                     Row row = withdrawalService.addWithdrawalCardTokenData(info);
                     cardTokenRepository.create(row);
@@ -65,7 +69,7 @@ public class WithdrawalKafkaListener {
 
     public static <K> String toSummaryWithdrawalString(List<ConsumerRecord<K, Withdrawal>> records) {
         String valueKeysString = records.stream().map(ConsumerRecord::value)
-                .map((value) -> String.format("'%s'", value.getId()))
+                .map((value) -> String.format("'%s' - '%s'", value.getId(), value.getStatus()))
                 .collect(Collectors.joining(", "));
         return String.format("%s, values={%s}", LogUtil.toSummaryString(records), valueKeysString);
     }
