@@ -110,9 +110,6 @@ public class HandlerTest {
         assertThrows(InvalidRequest.class,
                 () -> trustedTokensHandler.createNewConditionTemplate(
                         createTemplatePaymentRequestWithNullCount()));
-        assertThrows(InvalidRequest.class,
-                () -> trustedTokensHandler.createNewConditionTemplate(
-                        createTemplatePaymentRequestWithNullSum()));
     }
 
 }

@@ -14,7 +14,6 @@ public class PaymentsConditionsValidator extends ConditionsValidator implements 
     public void validateConditions(List<Condition> conditions) throws InvalidRequest {
         Objects.requireNonNull(conditions, "Conditions must be set.");
         for (Condition condition : conditions) {
-            requireSum(condition.getSum());
             validateRequiredFields(condition);
         }
     }
