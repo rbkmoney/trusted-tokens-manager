@@ -1,10 +1,13 @@
 package com.rbkmoney.trusted.tokens.calculator;
 
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class YearsCountCalc {
 
     public static int getCountYears(Map<Integer, CardTokenData.YearsData> years, Integer yearsOffset) {
