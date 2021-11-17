@@ -1,19 +1,33 @@
 package com.rbkmoney.trusted.tokens.calculator;
 
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class YearsCountCalc {
 
     public static int getCountYears(Map<Integer, CardTokenData.YearsData> years, Integer yearsOffset) {
         Integer lastYearToCalc = LocalDateTime.now().getYear() - yearsOffset;
-        return Integer.sum(years.entrySet().stream()
-                        .filter(year -> year.getKey() > lastYearToCalc)
-                        .mapToInt(year -> year.getValue().getYearCount())
-                        .sum(),
-                getCountMonths(years.get(lastYearToCalc).getMonths()));
+        return calculateCountFullYears(years, lastYearToCalc) + calculateCountMonths(years, lastYearToCalc);
+    }
+
+    private static int calculateCountMonths(Map<Integer, CardTokenData.YearsData> years, Integer lastYearToCalc) {
+        CardTokenData.YearsData yearsData = years.get(lastYearToCalc);
+        if (yearsData == null) {
+            return 0;
+        }
+        return getCountMonths(yearsData.getMonths());
+    }
+
+    private static int calculateCountFullYears(Map<Integer, CardTokenData.YearsData> years, Integer lastYearToCalc) {
+        return years.entrySet().stream()
+                .filter(year -> year.getKey() > lastYearToCalc)
+                .mapToInt(year -> year.getValue().getYearCount())
+                .sum();
     }
 
     private static int getCountMonths(Map<Integer, CardTokenData.MonthsData> months) {
