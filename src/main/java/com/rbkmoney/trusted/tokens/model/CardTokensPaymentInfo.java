@@ -6,6 +6,9 @@ import lombok.Data;
 @Data
 @Builder
 public class CardTokensPaymentInfo {
+
+    public String lastPaymentId;
+    public String lastWithdrawalId;
     public String token;
     public String currency;
     public long amount;
