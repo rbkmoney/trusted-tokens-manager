@@ -29,7 +29,8 @@ public class CardTokenServiceImpl implements CardTokenService {
 
     @Override
     public CardTokenData get(String token) {
-        return repository.get(token);
+        return Optional.ofNullable(repository.get(token))
+                .orElse(new CardTokenData());
     }
 
     @Override
