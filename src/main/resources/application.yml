@@ -60,14 +60,14 @@ kafka:
   topics:
     payment:
       id: payment_event
-      dest: change_ig
+      dest: filtered_payment
       consume:
         enabled: false
         max-poll-records: 50
         concurrency: 1
     withdrawal:
       id: withdrawal
-      dest: change_it
+      dest: filtered_withdrawal
       consume:
         enabled: false
         max-poll-records: 50

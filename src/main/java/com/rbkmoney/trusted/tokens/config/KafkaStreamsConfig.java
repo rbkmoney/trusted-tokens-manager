@@ -1,8 +1,8 @@
 package com.rbkmoney.trusted.tokens.config;
 
 import com.rbkmoney.trusted.tokens.config.properties.KafkaSslProperties;
-import com.rbkmoney.trusted.tokens.serde.deserializer.PaymentDeserializer;
-import com.rbkmoney.trusted.tokens.serde.deserializer.WithdrawalDeserializer;
+import com.rbkmoney.trusted.tokens.serde.PaymentSerde;
+import com.rbkmoney.trusted.tokens.serde.WithdrawalSerde;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.config.SslConfigs;
@@ -52,7 +52,7 @@ public class KafkaStreamsConfig {
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, APP_ID + PAYMENT_SUFFIX);
         props.put(StreamsConfig.CLIENT_ID_CONFIG, clientId + PAYMENT_SUFFIX);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, PaymentDeserializer.class);
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, PaymentSerde.class);
         addDefaultStreamsProperties(props);
         props.putAll(configureSsl(kafkaSslProperties));
         return props;
@@ -81,7 +81,7 @@ public class KafkaStreamsConfig {
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, APP_ID + WITHDRAWAL_SUFFIX);
         props.put(StreamsConfig.CLIENT_ID_CONFIG, clientId + WITHDRAWAL_SUFFIX);
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, WithdrawalDeserializer.class);
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, WithdrawalSerde.class);
         addDefaultStreamsProperties(props);
         props.putAll(configureSsl(kafkaSslProperties));
         return props;

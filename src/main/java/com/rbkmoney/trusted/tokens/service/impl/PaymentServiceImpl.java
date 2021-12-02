@@ -9,6 +9,7 @@ import com.rbkmoney.trusted.tokens.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,10 +34,10 @@ public class PaymentServiceImpl implements PaymentService {
                         token);
                 CardTokenData cardTokenData = cardTokenService.get(token);
                 String lastPaymentId = cardTokenData.getLastPaymentId();
-                if (Objects.isNull(lastPaymentId)) {
+                if (isOldCardTokenData(cardTokenData, lastPaymentId)) {
                     erasePaymentData(cardTokenData, token);
                 }
-                if (lastPaymentId.equals(payment.getId())) {
+                if (Objects.nonNull(lastPaymentId) && lastPaymentId.equals(payment.getId())) {
                     log.info("Payment with id {} already exist", payment.getId());
                     continue;
                 }
@@ -47,6 +48,10 @@ public class PaymentServiceImpl implements PaymentService {
                 throw new TransactionSavingException(e, index);
             }
         }
+    }
+
+    private boolean isOldCardTokenData(CardTokenData cardTokenData, String lastPaymentId) {
+        return Objects.isNull(lastPaymentId) && !CollectionUtils.isEmpty(cardTokenData.getPayments());
     }
 
     private void erasePaymentData(CardTokenData cardTokenData, String token) {

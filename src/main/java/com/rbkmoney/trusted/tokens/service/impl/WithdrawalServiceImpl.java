@@ -9,6 +9,7 @@ import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,10 +34,10 @@ public class WithdrawalServiceImpl implements WithdrawalService {
                         token);
                 CardTokenData cardTokenData = cardTokenService.get(token);
                 String lastWithdrawalId = cardTokenData.getLastWithdrawalId();
-                if (Objects.isNull(lastWithdrawalId)) {
+                if (isOldCardTokenData(cardTokenData, lastWithdrawalId)) {
                     eraseWithdrawalData(cardTokenData, token);
                 }
-                if (lastWithdrawalId.equals(withdrawal.getId())) {
+                if (Objects.nonNull(lastWithdrawalId) && lastWithdrawalId.equals(withdrawal.getId())) {
                     log.info("WithdrawalService withdrawal with id {} already exist", withdrawal.getId());
                     continue;
                 }
@@ -47,6 +48,10 @@ public class WithdrawalServiceImpl implements WithdrawalService {
                 throw new TransactionSavingException(e, index);
             }
         }
+    }
+
+    private boolean isOldCardTokenData(CardTokenData cardTokenData, String lastWithdrawalId) {
+        return Objects.isNull(lastWithdrawalId) && !CollectionUtils.isEmpty(cardTokenData.getPayments());
     }
 
     private void eraseWithdrawalData(CardTokenData cardTokenData, String token) {

@@ -27,7 +27,9 @@ import static org.mockito.Mockito.*;
                 "kafka.state.cache.size=0"},
         topicsKeys = {
                 "kafka.topics.payment.id",
-                "kafka.topics.withdrawal.id"})
+                "kafka.topics.withdrawal.id",
+                "kafka.topics.payment.dest",
+                "kafka.topics.withdrawal.dest"})
 @KafkaSpringBootTest
 @Import(MockedStartupInitializers.class)
 public class ListenerTest {
