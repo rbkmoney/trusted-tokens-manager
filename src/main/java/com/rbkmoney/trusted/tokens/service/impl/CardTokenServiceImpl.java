@@ -1,10 +1,11 @@
-package com.rbkmoney.trusted.tokens.service;
+package com.rbkmoney.trusted.tokens.service.impl;
 
 import com.rbkmoney.trusted.tokens.converter.RowConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
 import com.rbkmoney.trusted.tokens.model.Row;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
+import com.rbkmoney.trusted.tokens.service.CardTokenService;
 import com.rbkmoney.trusted.tokens.updater.CardTokenDataUpdater;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,23 +35,25 @@ public class CardTokenServiceImpl implements CardTokenService {
     }
 
     @Override
-    public void addWithdrawal(CardTokenData cardTokenData, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    public CardTokenData addWithdrawal(CardTokenData cardTokenData, CardTokensPaymentInfo cardTokensPaymentInfo) {
         Map<String, CardTokenData.CurrencyData> currencyDataMap = cardTokenDataUpdater.updateCurrencyData(
                 cardTokensPaymentInfo,
                 Optional.ofNullable(cardTokenData.getWithdrawals())
                         .orElse(new HashMap<>()));
         cardTokenData.setWithdrawals(currencyDataMap);
         cardTokenData.setLastWithdrawalId(cardTokensPaymentInfo.getLastWithdrawalId());
+        return cardTokenData;
     }
 
     @Override
-    public void addPayment(CardTokenData cardTokenData, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    public CardTokenData addPayment(CardTokenData cardTokenData, CardTokensPaymentInfo cardTokensPaymentInfo) {
         Map<String, CardTokenData.CurrencyData> currencyMap = cardTokenDataUpdater.updateCurrencyData(
                 cardTokensPaymentInfo,
                 Optional.ofNullable(cardTokenData.getPayments())
                         .orElse(new HashMap<>()));
         cardTokenData.setPayments(currencyMap);
         cardTokenData.setLastPaymentId(cardTokensPaymentInfo.getLastPaymentId());
+        return cardTokenData;
     }
 
 }

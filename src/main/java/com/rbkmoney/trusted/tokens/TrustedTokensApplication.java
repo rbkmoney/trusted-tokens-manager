@@ -24,7 +24,6 @@ public class TrustedTokensApplication extends SpringApplication {
     @PreDestroy
     public void preDestroy() {
         eventSinkStreamsPool.cleanAll();
-        client.shutdown()
-        ;
+        client.shutdown();
     }
 }

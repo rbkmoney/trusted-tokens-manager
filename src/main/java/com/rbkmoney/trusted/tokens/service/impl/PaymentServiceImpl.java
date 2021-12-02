@@ -1,14 +1,17 @@
-package com.rbkmoney.trusted.tokens.service;
+package com.rbkmoney.trusted.tokens.service.impl;
 
 import com.rbkmoney.damsel.fraudbusters.Payment;
 import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
 import com.rbkmoney.trusted.tokens.exception.TransactionSavingException;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import com.rbkmoney.trusted.tokens.service.CardTokenService;
+import com.rbkmoney.trusted.tokens.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -23,23 +26,32 @@ public class PaymentServiceImpl implements PaymentService {
         for (Payment payment : payments) {
             int index = payments.indexOf(payment);
             try {
+                String token = payment.getPaymentTool().getBankCard().getToken();
                 log.info("Start create row with paymentID {} status {} token {}",
                         payment.getId(),
                         payment.getStatus(),
-                        payment.getPaymentTool().getBankCard().getToken());
-                CardTokenData cardTokenData =
-                        cardTokenService.get(payment.getPaymentTool().getBankCard().getToken());
-                if (cardTokenData.getLastWithdrawalId().equals(payment.getId())) {
+                        token);
+                CardTokenData cardTokenData = cardTokenService.get(token);
+                String lastPaymentId = cardTokenData.getLastPaymentId();
+                if (Objects.isNull(lastPaymentId)) {
+                    erasePaymentData(cardTokenData, token);
+                }
+                if (lastPaymentId.equals(payment.getId())) {
                     log.info("Payment with id {} already exist", payment.getId());
                     continue;
                 }
                 var info = transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(payment);
-                cardTokenService.addPayment(cardTokenData, info);
-                cardTokenService.save(cardTokenData, info.getToken());
+                CardTokenData enrichedCardTokenData = cardTokenService.addPayment(cardTokenData, info);
+                cardTokenService.save(enrichedCardTokenData, info.getToken());
             } catch (Exception e) {
                 throw new TransactionSavingException(e, index);
             }
         }
+    }
+
+    private void erasePaymentData(CardTokenData cardTokenData, String token) {
+        cardTokenData.setPayments(null);
+        cardTokenService.save(cardTokenData, token);
     }
 
 
