@@ -8,14 +8,10 @@ import com.rbkmoney.damsel.fraudbusters.*;
 import com.rbkmoney.testcontainers.annotations.util.ValuesGenerator;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static com.rbkmoney.testcontainers.annotations.util.RandomBeans.randomThrift;
 
 public class TransactionUtils {
-
-    public static final String TOKEN = "token";
-    public static final String EXCEPTION_TOKEN = "exception_token";
 
     public static Payment createPayment() {
         return new Payment()
@@ -41,10 +37,6 @@ public class TransactionUtils {
                         .setAmount(1000))
                 .setStatus(WithdrawalStatus.pending)
                 .setAccount(randomThrift(Account.class));
-    }
-
-    public static List<Payment> createPaymentList() {
-        return List.of(createPayment(), createPayment(), createPayment());
     }
 
 }

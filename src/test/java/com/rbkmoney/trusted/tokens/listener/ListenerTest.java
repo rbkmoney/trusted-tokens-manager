@@ -12,6 +12,7 @@ import com.rbkmoney.trusted.tokens.model.CardTokenData;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
 import com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils;
 import org.apache.thrift.TBase;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,11 @@ public class ListenerTest {
     @MockBean
     private CardTokenRepository cardTokenRepository;
 
+    @BeforeEach
+    void setUp() {
+        reset(cardTokenRepository);
+    }
+
     @Test
     void listenExistedCapturedPayment() {
         Payment payment = createPayment().setStatus(PaymentStatus.captured);
@@ -56,7 +62,9 @@ public class ListenerTest {
 
         testThriftKafkaProducer.send(paymentTopicName, payment);
 
-        verify(cardTokenRepository, timeout(5000).times(0)).create(any());
+        verify(cardTokenRepository, timeout(5000).times(1)).get(token);
+        verifyNoMoreInteractions(cardTokenRepository);
+
     }
 
     @Test
@@ -90,7 +98,8 @@ public class ListenerTest {
 
         testThriftKafkaProducer.send(withdrawalTopicName, withdrawal);
 
-        verify(cardTokenRepository, timeout(5000).times(0)).create(any());
+        verify(cardTokenRepository, timeout(5000).times(1)).get(token);
+        verifyNoMoreInteractions(cardTokenRepository);
     }
 
     @Test
