@@ -1,9 +1,10 @@
 package com.rbkmoney.trusted.tokens.service.impl;
 
 import com.rbkmoney.damsel.fraudbusters.Withdrawal;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensTransactionInfoConverter;
 import com.rbkmoney.trusted.tokens.exception.TransactionSavingException;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import com.rbkmoney.trusted.tokens.model.CardTokensTransactionInfo;
 import com.rbkmoney.trusted.tokens.service.CardTokenService;
 import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,11 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class WithdrawalServiceImpl implements WithdrawalService {
 
-    private final TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
+    private final TransactionToCardTokensTransactionInfoConverter transactionInfoConverter;
     private final CardTokenService cardTokenService;
 
     @Override
-    public void save(List<Withdrawal> withdrawals) {
+    public void saveAll(List<Withdrawal> withdrawals) {
         for (Withdrawal withdrawal : withdrawals) {
             int index = withdrawals.indexOf(withdrawal);
             try {
@@ -41,7 +42,7 @@ public class WithdrawalServiceImpl implements WithdrawalService {
                     log.info("WithdrawalService withdrawal with id {} already exist", withdrawal.getId());
                     continue;
                 }
-                var info = transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
+                CardTokensTransactionInfo info = transactionInfoConverter.convertWithdrawal(withdrawal);
                 CardTokenData enrichedCardTokenData = cardTokenService.addWithdrawal(cardTokenData, info);
                 cardTokenService.save(enrichedCardTokenData, info.getToken());
             } catch (Exception e) {

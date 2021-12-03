@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface WithdrawalService {
 
-    void save(List<Withdrawal> withdrawals);
+    void saveAll(List<Withdrawal> withdrawals);
 
 }

@@ -2,7 +2,7 @@ package com.rbkmoney.trusted.tokens.service.impl;
 
 import com.rbkmoney.trusted.tokens.converter.RowConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
-import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
+import com.rbkmoney.trusted.tokens.model.CardTokensTransactionInfo;
 import com.rbkmoney.trusted.tokens.model.Row;
 import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
 import com.rbkmoney.trusted.tokens.service.CardTokenService;
@@ -35,24 +35,25 @@ public class CardTokenServiceImpl implements CardTokenService {
     }
 
     @Override
-    public CardTokenData addWithdrawal(CardTokenData cardTokenData, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    public CardTokenData addWithdrawal(CardTokenData cardTokenData,
+                                       CardTokensTransactionInfo cardTokensTransactionInfo) {
         Map<String, CardTokenData.CurrencyData> currencyDataMap = cardTokenDataUpdater.updateCurrencyData(
-                cardTokensPaymentInfo,
+                cardTokensTransactionInfo,
                 Optional.ofNullable(cardTokenData.getWithdrawals())
                         .orElse(new HashMap<>()));
         cardTokenData.setWithdrawals(currencyDataMap);
-        cardTokenData.setLastWithdrawalId(cardTokensPaymentInfo.getLastWithdrawalId());
+        cardTokenData.setLastWithdrawalId(cardTokensTransactionInfo.getLastWithdrawalId());
         return cardTokenData;
     }
 
     @Override
-    public CardTokenData addPayment(CardTokenData cardTokenData, CardTokensPaymentInfo cardTokensPaymentInfo) {
+    public CardTokenData addPayment(CardTokenData cardTokenData, CardTokensTransactionInfo cardTokensTransactionInfo) {
         Map<String, CardTokenData.CurrencyData> currencyMap = cardTokenDataUpdater.updateCurrencyData(
-                cardTokensPaymentInfo,
+                cardTokensTransactionInfo,
                 Optional.ofNullable(cardTokenData.getPayments())
                         .orElse(new HashMap<>()));
         cardTokenData.setPayments(currencyMap);
-        cardTokenData.setLastPaymentId(cardTokensPaymentInfo.getLastPaymentId());
+        cardTokenData.setLastPaymentId(cardTokensTransactionInfo.getLastPaymentId());
         return cardTokenData;
     }
 

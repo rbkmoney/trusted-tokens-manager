@@ -38,7 +38,7 @@ public class WithdrawalKafkaListener {
             List<Withdrawal> withdrawals = batch.stream()
                     .map(ConsumerRecord::value)
                     .collect(Collectors.toList());
-            withdrawalService.save(withdrawals);
+            withdrawalService.saveAll(withdrawals);
             ack.acknowledge();
             log.info("WithdrawalKafkaListener Records have been committed, size={}, {}",
                     batch.size(), toSummaryWithdrawalString(batch));

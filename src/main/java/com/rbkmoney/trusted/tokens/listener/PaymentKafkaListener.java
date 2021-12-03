@@ -38,7 +38,7 @@ public class PaymentKafkaListener {
             List<Payment> payments = batch.stream()
                     .map(ConsumerRecord::value)
                     .collect(Collectors.toList());
-            paymentService.save(payments);
+            paymentService.saveAll(payments);
             ack.acknowledge();
             log.info("PaymentKafkaListener Records have been committed, size={}, {}",
                     batch.size(), toSummaryPaymentString(batch));

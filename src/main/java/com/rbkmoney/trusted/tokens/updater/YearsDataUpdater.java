@@ -1,12 +1,14 @@
 package com.rbkmoney.trusted.tokens.updater;
 
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
-import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
+import com.rbkmoney.trusted.tokens.model.CardTokensTransactionInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -17,26 +19,26 @@ public class YearsDataUpdater {
     private int keepDataYears;
 
     public Map<Integer, CardTokenData.YearsData> updateYearsData(
-            Map<String, CardTokenData.CurrencyData> currencyMap, CardTokensPaymentInfo cardTokensPaymentInfo) {
-        String currency = cardTokensPaymentInfo.getCurrency();
-        int year = cardTokensPaymentInfo.getYear();
+            Map<String, CardTokenData.CurrencyData> currencyMap, CardTokensTransactionInfo cardTokensTransactionInfo) {
+        String currency = cardTokensTransactionInfo.getCurrency();
+        int year = cardTokensTransactionInfo.getYear();
         Map<Integer, CardTokenData.YearsData> yearsMap = Optional.of(currencyMap)
                 .map(map -> map.get(currency))
                 .map(CardTokenData.CurrencyData::getYears)
                 .orElse(new HashMap<>());
         yearsMap.keySet().removeIf(key -> key <= year - keepDataYears);
         yearsMap.put(year, CardTokenData.YearsData.builder()
-                .yearSum(updateYearSum(yearsMap, cardTokensPaymentInfo))
-                .yearCount(updateYearCount(yearsMap, cardTokensPaymentInfo))
-                .months(monthsDataUpdater.updateMonthsData(yearsMap, cardTokensPaymentInfo))
+                .yearSum(updateYearSum(yearsMap, cardTokensTransactionInfo))
+                .yearCount(updateYearCount(yearsMap, cardTokensTransactionInfo))
+                .months(monthsDataUpdater.updateMonthsData(yearsMap, cardTokensTransactionInfo))
                 .build());
         return yearsMap;
     }
 
     private long updateYearSum(Map<Integer, CardTokenData.YearsData> yearsMap,
-                               CardTokensPaymentInfo cardTokensPaymentInfo) {
-        long amount = cardTokensPaymentInfo.getAmount();
-        int year = cardTokensPaymentInfo.getYear();
+                               CardTokensTransactionInfo cardTokensTransactionInfo) {
+        long amount = cardTokensTransactionInfo.getAmount();
+        int year = cardTokensTransactionInfo.getYear();
         return Optional.of(yearsMap)
                 .map(map -> map.get(year))
                 .map(CardTokenData.YearsData::getYearSum)
@@ -45,8 +47,8 @@ public class YearsDataUpdater {
     }
 
     private int updateYearCount(Map<Integer, CardTokenData.YearsData> yearsMap,
-                                CardTokensPaymentInfo cardTokensPaymentInfo) {
-        int year = cardTokensPaymentInfo.getYear();
+                                CardTokensTransactionInfo cardTokensTransactionInfo) {
+        int year = cardTokensTransactionInfo.getYear();
         return Optional.of(yearsMap)
                 .map(map -> map.get(year))
                 .map(CardTokenData.YearsData::getYearCount)

@@ -1,9 +1,10 @@
 package com.rbkmoney.trusted.tokens.service.impl;
 
 import com.rbkmoney.damsel.fraudbusters.Payment;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensTransactionInfoConverter;
 import com.rbkmoney.trusted.tokens.exception.TransactionSavingException;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
+import com.rbkmoney.trusted.tokens.model.CardTokensTransactionInfo;
 import com.rbkmoney.trusted.tokens.service.CardTokenService;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,11 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
 
-    private final TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
+    private final TransactionToCardTokensTransactionInfoConverter transactionInfoConverter;
     private final CardTokenService cardTokenService;
 
     @Override
-    public void save(List<Payment> payments) {
+    public void saveAll(List<Payment> payments) {
         for (Payment payment : payments) {
             int index = payments.indexOf(payment);
             try {
@@ -41,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
                     log.info("Payment with id {} already exist", payment.getId());
                     continue;
                 }
-                var info = transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(payment);
+                CardTokensTransactionInfo info = transactionInfoConverter.convertPayment(payment);
                 CardTokenData enrichedCardTokenData = cardTokenService.addPayment(cardTokenData, info);
                 cardTokenService.save(enrichedCardTokenData, info.getToken());
             } catch (Exception e) {
