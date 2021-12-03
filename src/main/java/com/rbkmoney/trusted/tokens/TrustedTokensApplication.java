@@ -1,7 +1,7 @@
 package com.rbkmoney.trusted.tokens;
 
 import com.basho.riak.client.api.RiakClient;
-import com.rbkmoney.trusted.tokens.initializer.EventSinkStreamsPool;
+import com.rbkmoney.trusted.tokens.initializer.EventStreamsPool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +15,7 @@ import javax.annotation.PreDestroy;
 public class TrustedTokensApplication extends SpringApplication {
 
     private final RiakClient client;
-    private final EventSinkStreamsPool eventSinkStreamsPool;
+    private final EventStreamsPool eventStreamsPool;
 
     public static void main(String[] args) {
         SpringApplication.run(TrustedTokensApplication.class, args);
@@ -23,7 +23,7 @@ public class TrustedTokensApplication extends SpringApplication {
 
     @PreDestroy
     public void preDestroy() {
-        eventSinkStreamsPool.cleanAll();
+        eventStreamsPool.cleanAll();
         client.shutdown();
     }
 }

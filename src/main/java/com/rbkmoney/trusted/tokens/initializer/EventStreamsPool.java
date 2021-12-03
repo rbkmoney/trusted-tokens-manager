@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
-public class EventSinkStreamsPool {
+public class EventStreamsPool {
 
     @Value("${kafka.stream.clean-timeout-sec}")
     private Long cleanTimeoutSec;

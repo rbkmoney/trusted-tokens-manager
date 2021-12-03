@@ -20,7 +20,7 @@ import java.util.List;
 public class KafkaStreamsStartupInitializer {
 
     private final List<EventFactory> eventFactories;
-    private final EventSinkStreamsPool eventSinkStreamsPool;
+    private final EventStreamsPool eventStreamsPool;
 
     @Value("${kafka.stream.clean-timeout-sec}")
     private Long cleanTimeoutSec;
@@ -37,7 +37,7 @@ public class KafkaStreamsStartupInitializer {
         KafkaStreams kafkaStreams = eventFactory.create();
         kafkaStreams.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> kafkaStreams.close(Duration.ofSeconds(cleanTimeoutSec))));
-        eventSinkStreamsPool.put(eventFactory.getType(), kafkaStreams);
+        eventStreamsPool.put(eventFactory.getType(), kafkaStreams);
         log.info("KafkaStreamsStartupInitializer start {} stream kafkaStreams: {}", eventFactory.getType().name(),
                 kafkaStreams.localThreadsMetadata());
     }
