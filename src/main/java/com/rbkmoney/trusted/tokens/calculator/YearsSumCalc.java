@@ -12,15 +12,13 @@ public class YearsSumCalc {
 
     public static long getSumYears(Map<Integer, CardTokenData.YearsData> years, Integer yearsOffset) {
         Integer lastYearToCalc = LocalDateTime.now().getYear() - yearsOffset;
-        return calculateFullYearsSum(years, lastYearToCalc) + calculateMonthSum(years, lastYearToCalc);
-    }
-
-    private static long calculateMonthSum(Map<Integer, CardTokenData.YearsData> years, Integer lastYearToCalc) {
         CardTokenData.YearsData yearsData = years.get(lastYearToCalc);
         if (yearsData == null) {
             return 0;
         }
-        return getSumMonths(yearsData.getMonths());
+        return yearsOffset == 0
+                ? years.get(LocalDateTime.now().getYear()).getYearSum()
+                : calculateFullYearsSum(years, lastYearToCalc) + calculateMonthsSum(yearsData.getMonths());
     }
 
     private static long calculateFullYearsSum(Map<Integer, CardTokenData.YearsData> years, Integer lastYearToCalc) {
@@ -30,7 +28,7 @@ public class YearsSumCalc {
                 .sum();
     }
 
-    private static long getSumMonths(Map<Integer, CardTokenData.MonthsData> months) {
+    private static long calculateMonthsSum(Map<Integer, CardTokenData.MonthsData> months) {
         Integer currentMonth = LocalDateTime.now().getMonthValue();
         return months.entrySet().stream()
                 .filter(month -> month.getKey() > currentMonth)
