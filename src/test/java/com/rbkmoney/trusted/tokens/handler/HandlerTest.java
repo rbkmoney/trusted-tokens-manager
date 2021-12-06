@@ -16,13 +16,14 @@ import org.springframework.context.annotation.Import;
 import static com.rbkmoney.trusted.tokens.utils.CardTokenDataUtils.createCardTokenData;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateRequestUtils.*;
 import static com.rbkmoney.trusted.tokens.utils.ConditionTemplateUtils.*;
-import static com.rbkmoney.trusted.tokens.utils.TransactionUtils.TOKEN;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Import(MockedStartupInitializers.class)
 public class HandlerTest {
+
+    private static final String TOKEN = "token";
 
     @MockBean
     private ConditionTemplateRepository conditionTemplateRepository;

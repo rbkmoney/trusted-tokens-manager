@@ -1,11 +1,8 @@
 package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.Payment;
-import com.rbkmoney.damsel.fraudbusters.PaymentStatus;
 import com.rbkmoney.kafka.common.util.LogUtil;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
-import com.rbkmoney.trusted.tokens.model.Row;
-import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
+import com.rbkmoney.trusted.tokens.exception.TransactionSavingException;
 import com.rbkmoney.trusted.tokens.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,45 +21,30 @@ import java.util.stream.Collectors;
 public class PaymentKafkaListener {
 
     private final PaymentService paymentService;
-    private final TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
-    private final CardTokenRepository cardTokenRepository;
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
     @KafkaListener(
             autoStartup = "${kafka.topics.payment.consume.enabled}",
-            topics = "${kafka.topics.payment.id}",
+            topics = "${kafka.topics.payment.dest}",
             containerFactory = "paymentListenerContainerFactory")
     public void listen(
             List<ConsumerRecord<String, Payment>> batch,
             Acknowledgment ack) {
-        int index = 0;
         try {
             log.info("PaymentKafkaListener listen offsets, size={}, {}",
                     batch.size(), toSummaryPaymentString(batch));
             List<Payment> payments = batch.stream()
                     .map(ConsumerRecord::value)
                     .collect(Collectors.toList());
-            for (Payment payment : payments) {
-                index = payments.indexOf(payment);
-                if (PaymentStatus.captured == payment.getStatus()
-                        && payment.getPaymentTool().isSetBankCard()) {
-                    log.info("Start create row with paymentID {} status {} token {}",
-                            payment.getId(),
-                            payment.getStatus(),
-                            payment.getPaymentTool().getBankCard().getToken());
-                    var info = transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(payment);
-                    Row row = paymentService.addPaymentCardTokenData(info);
-                    cardTokenRepository.create(row);
-                }
-            }
+            paymentService.saveAll(payments);
             ack.acknowledge();
             log.info("PaymentKafkaListener Records have been committed, size={}, {}",
                     batch.size(), toSummaryPaymentString(batch));
-        } catch (Exception ex) {
+        } catch (TransactionSavingException ex) {
             log.error("Error when PaymentKafkaListener listen ex,", ex);
-            ack.nack(index, throttlingTimeout);
+            ack.nack(ex.getTrxIndex(), throttlingTimeout);
             throw ex;
         }
     }

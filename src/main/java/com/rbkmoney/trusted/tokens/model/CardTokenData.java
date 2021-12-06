@@ -1,11 +1,17 @@
 package com.rbkmoney.trusted.tokens.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
 @Data
 public class CardTokenData {
+
+    public String lastPaymentId;
+    public String lastWithdrawalId;
     public Map<String, CurrencyData> payments;
     public Map<String, CurrencyData> withdrawals;
 

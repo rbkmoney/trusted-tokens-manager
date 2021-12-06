@@ -1,9 +1,9 @@
 package com.rbkmoney.trusted.tokens.updater;
 
 import com.rbkmoney.trusted.tokens.config.MockedStartupInitializers;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
+import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensTransactionInfoConverter;
 import com.rbkmoney.trusted.tokens.model.CardTokenData;
-import com.rbkmoney.trusted.tokens.model.CardTokensPaymentInfo;
+import com.rbkmoney.trusted.tokens.model.CardTokensTransactionInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @SpringBootTest
 @Import(MockedStartupInitializers.class)
-class CardTokensPaymentInfoDataUpdaterTest {
+class CardTokensTransactionInfoDataUpdaterTest {
 
     private final int currentYear = LocalDateTime.now().getYear();
     private final int currentMonth = LocalDateTime.now().getMonthValue();
@@ -29,22 +29,22 @@ class CardTokensPaymentInfoDataUpdaterTest {
     private CardTokenDataUpdater cardTokenDataUpdater;
 
     @Autowired
-    private TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
+    private TransactionToCardTokensTransactionInfoConverter transactionToCardTokensTransactionInfoConverter;
 
     private CardTokenData cardTokenData;
-    private CardTokensPaymentInfo paymentCardTokensPaymentInfo;
-    private CardTokensPaymentInfo withdrawalCardTokensPaymentInfo;
+    private CardTokensTransactionInfo paymentCardTokensTransactionInfo;
+    private CardTokensTransactionInfo withdrawalCardTokensTransactionInfo;
 
     @BeforeEach
     public void init() {
         cardTokenData = createCardTokenData();
-        paymentCardTokensPaymentInfo = createPaymentCardToken();
-        withdrawalCardTokensPaymentInfo = createWithdrawalCardToken();
+        paymentCardTokensTransactionInfo = createPaymentCardToken();
+        withdrawalCardTokensTransactionInfo = createWithdrawalCardToken();
     }
 
     @Test
     void convertPaymentTest() {
-        cardTokenDataUpdater.updateCurrencyData(paymentCardTokensPaymentInfo, cardTokenData.getPayments());
+        cardTokenDataUpdater.updateCurrencyData(paymentCardTokensTransactionInfo, cardTokenData.getPayments());
         assertFalse(cardTokenData.getPayments().get("RUB").getYears()
                 .containsKey(currentYear - 3));
         assertEquals(79000, cardTokenData.getPayments().get("RUB").getYears()
@@ -61,7 +61,7 @@ class CardTokensPaymentInfoDataUpdaterTest {
 
     @Test
     void convertWithdrawalTest() {
-        cardTokenDataUpdater.updateCurrencyData(withdrawalCardTokensPaymentInfo, cardTokenData.getWithdrawals());
+        cardTokenDataUpdater.updateCurrencyData(withdrawalCardTokensTransactionInfo, cardTokenData.getWithdrawals());
         assertFalse(cardTokenData.getWithdrawals().get("RUB").getYears()
                 .containsKey(currentYear - 3));
         assertEquals(79, cardTokenData.getWithdrawals().get("RUB").getYears()
@@ -71,12 +71,12 @@ class CardTokensPaymentInfoDataUpdaterTest {
                 .getMonths().get(currentMonth).getMonthCount());
     }
 
-    private CardTokensPaymentInfo createPaymentCardToken() {
-        return transactionToCardTokensPaymentInfoConverter.convertPaymentToCardToken(createPayment());
+    private CardTokensTransactionInfo createPaymentCardToken() {
+        return transactionToCardTokensTransactionInfoConverter.convertPayment(createPayment());
     }
 
-    private CardTokensPaymentInfo createWithdrawalCardToken() {
-        return transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(createWithdrawal());
+    private CardTokensTransactionInfo createWithdrawalCardToken() {
+        return transactionToCardTokensTransactionInfoConverter.convertWithdrawal(createWithdrawal());
     }
 
 }

@@ -1,11 +1,8 @@
 package com.rbkmoney.trusted.tokens.listener;
 
 import com.rbkmoney.damsel.fraudbusters.Withdrawal;
-import com.rbkmoney.damsel.fraudbusters.WithdrawalStatus;
 import com.rbkmoney.kafka.common.util.LogUtil;
-import com.rbkmoney.trusted.tokens.converter.TransactionToCardTokensPaymentInfoConverter;
-import com.rbkmoney.trusted.tokens.model.Row;
-import com.rbkmoney.trusted.tokens.repository.CardTokenRepository;
+import com.rbkmoney.trusted.tokens.exception.TransactionSavingException;
 import com.rbkmoney.trusted.tokens.service.WithdrawalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,45 +21,30 @@ import java.util.stream.Collectors;
 public class WithdrawalKafkaListener {
 
     private final WithdrawalService withdrawalService;
-    private final TransactionToCardTokensPaymentInfoConverter transactionToCardTokensPaymentInfoConverter;
-    private final CardTokenRepository cardTokenRepository;
 
     @Value("${kafka.consumer.throttling-timeout-ms}")
     private int throttlingTimeout;
 
     @KafkaListener(
             autoStartup = "${kafka.topics.withdrawal.consume.enabled}",
-            topics = "${kafka.topics.withdrawal.id}",
+            topics = "${kafka.topics.withdrawal.dest}",
             containerFactory = "withdrawalListenerContainerFactory")
     public void listen(
             List<ConsumerRecord<String, Withdrawal>> batch,
             Acknowledgment ack) {
-        int index = 0;
         try {
             log.info("WithdrawalKafkaListener listen offsets, size={}, {}",
                     batch.size(), toSummaryWithdrawalString(batch));
             List<Withdrawal> withdrawals = batch.stream()
                     .map(ConsumerRecord::value)
                     .collect(Collectors.toList());
-            for (Withdrawal withdrawal : withdrawals) {
-                index = withdrawals.indexOf(withdrawal);
-                if (WithdrawalStatus.succeeded == withdrawal.getStatus()
-                        && withdrawal.getDestinationResource().isSetBankCard()) {
-                    log.info("Start create row with withdrawalID {} status {} token {}",
-                            withdrawal.getId(),
-                            withdrawal.getStatus(),
-                            withdrawal.getDestinationResource().getBankCard().getToken());
-                    var info = transactionToCardTokensPaymentInfoConverter.convertWithdrawalToCardToken(withdrawal);
-                    Row row = withdrawalService.addWithdrawalCardTokenData(info);
-                    cardTokenRepository.create(row);
-                }
-            }
+            withdrawalService.saveAll(withdrawals);
             ack.acknowledge();
             log.info("WithdrawalKafkaListener Records have been committed, size={}, {}",
                     batch.size(), toSummaryWithdrawalString(batch));
-        } catch (Exception ex) {
+        } catch (TransactionSavingException ex) {
             log.error("Error when WithdrawalKafkaListener listen ex,", ex);
-            ack.nack(index, throttlingTimeout);
+            ack.nack(ex.getTrxIndex(), throttlingTimeout);
             throw ex;
         }
     }

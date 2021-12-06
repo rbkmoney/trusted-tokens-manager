@@ -45,6 +45,13 @@ riak:
 kafka:
   bootstrap-servers: kenny-kafka1.bst1.rbkmoney.net:9092
   client-id: trusted-tokens-manager
+  num-stream-threads: 7
+  stream:
+    retries-attempts: 300
+    retries-backoff-ms: 1000
+    default-api-timeout-ms: 300000
+    clean-timeout-sec: 20
+    fixed-rate-timeout-ms: 60000
   consumer:
     group-id: trusted-tokens-group-1
     max-poll-interval-ms: 60000
@@ -53,12 +60,14 @@ kafka:
   topics:
     payment:
       id: payment_event
+      dest: filtered_payment
       consume:
         enabled: false
         max-poll-records: 50
         concurrency: 1
     withdrawal:
       id: withdrawal
+      dest: filtered_withdrawal
       consume:
         enabled: false
         max-poll-records: 50

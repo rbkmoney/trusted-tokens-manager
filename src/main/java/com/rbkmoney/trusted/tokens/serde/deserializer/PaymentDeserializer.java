@@ -1,4 +1,4 @@
-package com.rbkmoney.trusted.tokens.serde;
+package com.rbkmoney.trusted.tokens.serde.deserializer;
 
 
 import com.rbkmoney.damsel.fraudbusters.Payment;
