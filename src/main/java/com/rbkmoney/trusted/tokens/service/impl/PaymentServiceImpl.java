@@ -29,7 +29,7 @@ public class PaymentServiceImpl implements PaymentService {
             int index = payments.indexOf(payment);
             try {
                 String token = payment.getPaymentTool().getBankCard().getToken();
-                log.info("Start create row with paymentID {} status {} token {}",
+                log.info("PaymentService start create row with paymentID {} status {} token {}",
                         payment.getId(),
                         payment.getStatus(),
                         token);
@@ -38,13 +38,13 @@ public class PaymentServiceImpl implements PaymentService {
                 if (isOldCardTokenData(cardTokenData, lastPaymentId)) {
                     erasePaymentData(cardTokenData, token);
                 }
-                if (Objects.nonNull(lastPaymentId) && lastPaymentId.equals(payment.getId())) {
-                    log.info("Payment with id {} already exist", payment.getId());
-                    continue;
+                if (Objects.isNull(lastPaymentId) || !Objects.equals(lastPaymentId, payment.getId())) {
+                    CardTokensTransactionInfo info = transactionInfoConverter.convertPayment(payment);
+                    CardTokenData enrichedCardTokenData = cardTokenService.addPayment(cardTokenData, info);
+                    cardTokenService.save(enrichedCardTokenData, info.getToken());
+                } else {
+                    log.info("PaymentService payment with id {} already exist", payment.getId());
                 }
-                CardTokensTransactionInfo info = transactionInfoConverter.convertPayment(payment);
-                CardTokenData enrichedCardTokenData = cardTokenService.addPayment(cardTokenData, info);
-                cardTokenService.save(enrichedCardTokenData, info.getToken());
             } catch (Exception e) {
                 throw new TransactionSavingException(e, index);
             }

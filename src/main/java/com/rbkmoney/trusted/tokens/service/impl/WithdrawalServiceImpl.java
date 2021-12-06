@@ -38,13 +38,13 @@ public class WithdrawalServiceImpl implements WithdrawalService {
                 if (isOldCardTokenData(cardTokenData, lastWithdrawalId)) {
                     eraseWithdrawalData(cardTokenData, token);
                 }
-                if (Objects.nonNull(lastWithdrawalId) && lastWithdrawalId.equals(withdrawal.getId())) {
+                if (Objects.isNull(lastWithdrawalId) || !Objects.equals(lastWithdrawalId, withdrawal.getId())) {
+                    CardTokensTransactionInfo info = transactionInfoConverter.convertWithdrawal(withdrawal);
+                    CardTokenData enrichedCardTokenData = cardTokenService.addWithdrawal(cardTokenData, info);
+                    cardTokenService.save(enrichedCardTokenData, info.getToken());
+                } else {
                     log.info("WithdrawalService withdrawal with id {} already exist", withdrawal.getId());
-                    continue;
                 }
-                CardTokensTransactionInfo info = transactionInfoConverter.convertWithdrawal(withdrawal);
-                CardTokenData enrichedCardTokenData = cardTokenService.addWithdrawal(cardTokenData, info);
-                cardTokenService.save(enrichedCardTokenData, info.getToken());
             } catch (Exception e) {
                 throw new TransactionSavingException(e, index);
             }
