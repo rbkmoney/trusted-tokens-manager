@@ -22,7 +22,7 @@ public class CardTokenDataUtils {
         int currentYear = LocalDateTime.now().getYear();
         CardTokenData.CurrencyData currencyData = new CardTokenData.CurrencyData();
         Map<Integer, CardTokenData.YearsData> yearsDataMap = new HashMap<>();
-        for (int i = currentYear + 1; i > currentYear - 4; i--) {
+        for (int i = currentYear; i > currentYear - 4; i--) {
             CardTokenData.YearsData yearsData = new CardTokenData.YearsData();
             Map<Integer, CardTokenData.MonthsData> monthsDataMap = new HashMap<>();
             int yearCount = 0;
